@@ -1,0 +1,7 @@
+- hosts: nas_host
+  vars_files:
+    - ./settings.yaml
+  roles:
+    - role: dlna-server
+    - role: file-server
+    #- role: nspawn-host

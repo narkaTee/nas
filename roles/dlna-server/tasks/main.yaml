@@ -1,0 +1,26 @@
+- name: Install minidlna
+  ansible.builtin.package:
+    name: minidlna
+    state: present
+
+- name: sysctl config for minidlna
+  ansible.builtin.template:
+    src: ../templates/sysctl.conf.j2
+    dest: /etc/sysctl.d/50-local-minidlna.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify:
+    - apply sysctl
+
+- name: Minidlna config
+  ansible.builtin.template:
+    src: ../templates/minidlna.conf.j2
+    dest: /etc/minidlna.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify:
+    - restart minidlna
