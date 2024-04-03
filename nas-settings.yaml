@@ -11,3 +11,13 @@ fs_shares:
   - name: backup
     public: true
     path: /backup/share
+
+pipxe_interface: eth0
+# dnsmasq dhcp range that will be proxies to the other dhcp server
+pipxe_dhcp_range: "10.143.174.255"
+pipxe_base_dir: "/pipxe"
+pipxe_bootstrap_img: ".cache/pi.img"
+pipxe_hosts:
+  - name: retropi
+    mac: "b8:27:eb:95:ec:6e"
+    serial: "6e95ec6e"

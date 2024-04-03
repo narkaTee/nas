@@ -1,0 +1,1 @@
+console=serial0,115200 console=tty1 root=/dev/nfs nfsroot={{host_ip}}:{{pipxe_base_dir}}/{{host.name}}-root,tcp{% if host.nfsvers is defined %},nfsvers={{host.nfsvers}}{% endif %} rw ip=dhcp rootwait elevator=deadline plymouth.enable=0

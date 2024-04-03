@@ -1,0 +1,11 @@
+bind-interfaces
+interface={{pipxe_interface}}
+port=0
+dhcp-range={{pipxe_dhcp_range}},proxy
+log-dhcp
+enable-tftp
+{% for host in pipxe_hosts %}
+dhcp-host={{host.mac}},net:pipxe
+{% endfor %}
+tftp-root={{pipxe_base_dir}}/tftproot
+pxe-service=net:pipxe,0,"Raspberry Pi Boot"
