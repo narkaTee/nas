@@ -1,6 +1,6 @@
 - hosts: nas_host
   vars_files:
-    - ./settings.yaml
+    - ./nas-settings.yaml
   roles:
     - role: dlna-server
     - role: file-server
