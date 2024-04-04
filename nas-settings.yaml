@@ -34,3 +34,10 @@ ob_locations:
   - src: /backup/
   - name: ssd-share
     src: /nas/ssd/share
+
+nh_containers:
+  - name: pihole
+    os: debian
+    ports:
+      - tcp:8080:80
+      - udp:53:53

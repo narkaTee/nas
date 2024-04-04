@@ -6,4 +6,4 @@
     - role: file-server
     - role: pi-pxe-boot
     - role: offsite-backup
-    #- role: nspawn-host
+    - role: nspawn-host

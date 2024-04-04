@@ -1,0 +1,32 @@
+- block:
+    - name: "container {{container.name}}: Bootstrap debian"
+      ansible.builtin.command: >-
+        debootstrap --include=systemd,dbus,systemd-container,python3
+          stable "/var/lib/machines/{{container.name}}"
+      args:
+        creates: "/var/lib/machines/{{container.name}}"
+
+  rescue:
+    - name: "container {{container.name}}: delete container folder after failure"
+      ansible.builtin.file:
+        dest: "/var/lib/machines/{{container.name}}"
+        state: absent
+
+- name: "container {{container.name}}: Create nspawn file"
+  ansible.builtin.template:
+    owner: root
+    group: root
+    mode: '0644'
+    src: ../templates/container.nspawn.j2
+    dest: /etc/systemd/nspawn/{{container.name}}.nspawn
+  register: config
+
+- name: "container {{container.name}}: Container should autostart and be started"
+  ansible.builtin.service:
+    name: "systemd-nspawn@{{container.name}}"
+    enabled: true
+    state: started
+
+- name: "container {{container.name}}: Reboot container after config change"
+  ansible.builtin.command: machinectl reboot "{{container.name}}"
+  when: config.changed

@@ -1,0 +1,13 @@
+[Exec]
+PrivateUsers=pick
+ResolvConf=bind-host
+
+[Network]
+VirtualEthernet=yes
+IPMasquerade=yes
+{% for port in container.ports | default([]) %}
+Port={{ port }}
+{% endfor %}
+{% if container.bridge is defined %}
+Bridge={{ container.bridge }}
+{% endif %}

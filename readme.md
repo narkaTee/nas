@@ -97,3 +97,19 @@ https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-64-bit
   - tftpserver to host bootcode and pxe loader
 - nfs-kernel-server
   - nfs server to host the root and boot folders which will be mounted by the pi
+
+
+# nspawn host
+
+prepares the host to host systemd-nspawn containers and bootstraps
+containers.
+
+## tooling
+
+- systemd-container
+- debootstrap
+
+## docs
+
+- https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html
+- https://www.freedesktop.org/software/systemd/man/latest/systemd.nspawn.html
