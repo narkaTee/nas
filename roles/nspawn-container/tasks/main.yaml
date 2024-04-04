@@ -1,0 +1,9 @@
+- name: Enable systemd-networkd
+  ansible.builtin.service:
+    name: systemd-networkd
+    enabled: yes
+    state: started
+
+- name: Setup hostname
+  ansible.builtin.hostname:
+    name: "{{hostname}}"

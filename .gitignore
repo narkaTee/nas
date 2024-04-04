@@ -1,3 +1,5 @@
 *.swp
 .cache/*
 !.cache/.keep
+
+__pycache__/

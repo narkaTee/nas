@@ -1,0 +1,5 @@
+- hosts: containers
+  roles:
+    - role: nspawn-container
+      vars:
+        hostname: "{{inventory_hostname}}"

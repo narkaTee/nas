@@ -1,0 +1,9 @@
+all:
+  hosts:
+    pihole:
+      ansible_connection: machinectl
+      ansible_host: pihole
+  children:
+    containers:
+      hosts:
+        pihole:

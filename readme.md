@@ -113,3 +113,16 @@ containers.
 
 - https://www.freedesktop.org/software/systemd/man/latest/systemd-nspawn.html
 - https://www.freedesktop.org/software/systemd/man/latest/systemd.nspawn.html
+
+# nspawn container connection
+
+The become plugin is not usefull for containers because you need to mound
+the current users home directory into the container to access the python
+scripts ansible creates in the tmp diretory.
+
+see: https://github.com/ansible/ansible/issues/58962
+
+There is a working scetch of a connection plugin:
+https://github.com/tomeon/ansible-connection-machinectl
+
+For now I just copied it and simplified it a bit.
