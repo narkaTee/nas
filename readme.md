@@ -1,5 +1,69 @@
 # nas config
 
+# offsite backup
+
+The default is to use symmetric encryption. To use asymmetric encryption
+see "gpg key setup".
+
+## Tooling
+
+- duplicity
+- 1password-cli
+
+## gpg key setup
+
+IF using asymetric encryption a key pair is needed. Setup a key pair
+and set `ob_key_id`
+
+### create new key
+
+`gpg --full-generate-key`
+
+To export for save storage
+
+`gpg --armor --export <key id>`
+`gpg --armor --export-secret-key <key id>`
+
+
+### import key from backup
+
+`gpg --import keys.gpg`
+
+with 1password-cli:
+
+`op read 'op://<vault>/<item>/keys.gpg' | gpg --batch --passphrase "$(op read 'op://<vault>/<item>/passphrase')" --import`
+
+make sure to trust the key ultimately with gpg otherwise encryption will fail.
+
+## S3 backend
+
+For the s3 backend to properly work you need a role with the following
+definition:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowRw",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObjectAcl",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:DeleteObject",
+                "s3:GetBucketAcl",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::<bucket>/*",
+                "arn:aws:s3:::<bucket>"
+            ]
+        }
+    ]
+}
+```
+
 # raspberry pi pxe boot
 
 **There is basically NO security for the nfs shares! Consider them

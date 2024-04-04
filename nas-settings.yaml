@@ -21,3 +21,16 @@ pipxe_hosts:
   - name: retropi
     mac: "b8:27:eb:95:ec:6e"
     serial: "6e95ec6e"
+
+ob_backend_base_url: boto3+s3://narkat-offsite-backups
+ob_before_backup: |
+  source ~/.config/env.local.sh
+ob_aws:
+  access_key_id: "op://nas/aws-nas-user-access-key/aws_access_key_id"
+  secret_access_key: "op://nas/aws-nas-user-access-key/aws_secret_access_key"
+ob_passphrase: "op://nas/nas-backup-passphrase/passphrase"
+ob_locations:
+  - src: /pipxe/
+  - src: /backup/
+  - name: ssd-share
+    src: /nas/ssd/share

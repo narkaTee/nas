@@ -1,0 +1,78 @@
+# vim: ft=sh
+# shellcheck shell=bash
+url_file="${HOME}/.cache/duplicity/duplicityw_urls"
+
+_duplicityw() {
+    # use bash-completion helper to fetch the settings without
+    # breaking words at :
+    local cur prev words cword
+    _init_completion -n :
+
+    cmds="restore verify cleanup collection-status list-current-files remove-older-than"
+
+    options="--file-to-restore --time --force"
+
+    if [ "$cword" -eq 1 ]; then
+        mapfile -t COMPREPLY < <(compgen -W "$(compgen -W "$cmds" -- "$cur")" -- "$cur")
+        return 0
+    fi
+
+    if [[ $cur == -* ]]; then
+        mapfile -t COMPREPLY < <(compgen -W "$(compgen -W "$options" -- "$cur")" -- "$cur")
+        return 0
+    fi
+
+    # complete against urls that ansible cached
+    mapfile -t COMPREPLY < <(compgen -W "$(_duplicityw_urls)" -- "$cur")
+
+    # This is a messy clusterfuck. The alternative would be to remove
+    # the colon from $COMP_WORDBREAKS BUT that might break other
+    # completions... I don't want to debug a malfunction completion 5 years
+    # later... so here we go 🚀😎
+    # If the current input contains a colon and we have multiple replies
+    # we need to strip the colon because it is contained in COMP_WORDBREAKS.
+    # bash-completion has a helper function __ltrim_colon_completions to
+    # do this. But we cannot completely rely on this function.
+    #
+    # __ltrim_colon_completions only trims up to the colon.
+    #
+    # Exmaple:
+    # urls: s3://foobar/123 s3://foobar/1337
+    # # duplicityw restore s3://foobar/<tab>
+    #
+    # would display multiple options like this:
+    # //foobar/123 //foobar/1337
+    #
+    # That is head to parse. To prevent this we will check if $cur contains
+    # a colon and if we have multiple replies.
+    if [[ $cur = *:* ]] && [[ ${#COMPREPLY[@]} -gt 1 ]]; then
+        # If this is the case just strip $cur from the options
+        __ltrim_prefix_from_completions "$cur"
+        return 0
+    else
+        # We can use the colon helper if there is only 1 reply.
+        # This is required to properly replace the part right of
+        # the colon
+        __ltrim_colon_completions "$cur"
+        return 0
+    fi
+}
+
+_duplicityw_urls() {
+    if [ -e "$url_file" ] ; then
+        cat "$url_file"
+    fi
+}
+
+__ltrim_prefix_from_completions() {
+    # Remove prefix from COMPREPLY items
+    local prefix="$1"
+    local i=${#COMPREPLY[*]}
+    while ((i-- > 0)); do
+        COMPREPLY[i]=${COMPREPLY[i]#"$prefix"}
+    done
+}
+
+# -o default causes the default completion (which completes filenames) to
+# run when the function completion does no return any results.
+complete -o default -F _duplicityw duplicityw

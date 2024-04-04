@@ -1,0 +1,4 @@
+{% extends "backup-base.j2" %}
+{% block content%}
+op run -- duplicity $@
+{% endblock %}
