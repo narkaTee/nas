@@ -3,3 +3,10 @@
     - role: nspawn-container
       vars:
         hostname: "{{inventory_hostname}}"
+
+- hosts: pihole
+  roles:
+    - role: pihole
+  vars:
+    pihole_web_password: "{{lookup('community.general.onepassword', 'pihole', vault='nas', field='password')}}"
+    pihole_dns_1: 10.143.174.1

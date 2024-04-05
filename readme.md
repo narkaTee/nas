@@ -1,5 +1,9 @@
 # nas config
 
+# install dependencies
+
+`ansible-galaxy install -r requirements.yml`
+
 # offsite backup
 
 The default is to use symmetric encryption. To use asymmetric encryption

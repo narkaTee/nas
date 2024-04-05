@@ -1,0 +1,39 @@
+- name: Enable systemd-networkd to enable networking
+  ansible.builtin.service:
+    name: systemd-networkd
+    enabled: true
+    state: started
+
+- name: Install git
+  ansible.builtin.package:
+    name:
+      - git
+
+- name: Clone pi-hole repo
+  ansible.builtin.command: git clone --depth 1 https://github.com/pi-hole/pi-hole.git /etc/.pihole
+  args:
+    creates: /etc/.pihole
+
+- name: Create pihole config dir
+  ansible.builtin.file:
+    dest: /etc/pihole
+    mode: '0775'
+    state: directory
+
+- name: Create pihole setupvars
+  ansible.builtin.template:
+    src: ./templates/setupVars.conf.j2
+    dest: /etc/pihole/setupVars.conf
+  register: pihole_setupvars
+
+- name: Install pi-hole
+  ansible.builtin.command: "'/etc/.pihole/automated\ install/basic-install.sh' --unattended"
+  args:
+    creates: /opt/pihole
+  register: pihole_install
+
+- name: Reconfigure pi-hole after setupvars change
+  ansible.builtin.command: "'/etc/.pihole/automated\ install/basic-install.sh' --reconfigure --unattended"
+  when:
+    - not pihole_install.changed
+    - pihole_setupvars.changed

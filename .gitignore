@@ -3,3 +3,4 @@
 !.cache/.keep
 
 __pycache__/
+ansible_collections/
