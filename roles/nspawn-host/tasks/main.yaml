@@ -1,5 +1,4 @@
 - name: Install systemd-containers and debbootstrap
-  become: true
   ansible.builtin.package:
     name:
       - systemd-container
@@ -12,14 +11,12 @@
     group: root
     mode: '0755'
     state: directory
-  become: yes
 
 - name: Enable systemd-networkd
   ansible.builtin.service:
     name: systemd-networkd
     enabled: yes
     state: started
-  become: yes
 
 
 - name: "Create containers"

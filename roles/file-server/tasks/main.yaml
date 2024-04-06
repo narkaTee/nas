@@ -10,7 +10,6 @@
     create_home: false
     shell: /usr/sbin/nologin
     system: yes
-  become: yes
   register: guest_user
 
 - name: Samba config
@@ -29,4 +28,3 @@
     group: "{{guest_user.group}}"
     mode: "0765"
   loop: "{{fs_shares}}"
-  become: yes

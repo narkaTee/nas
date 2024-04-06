@@ -1,11 +1,13 @@
-- hosts: containers
+- name: Basic setup for nspawn containsers
+  hosts: containers
   roles:
     - role: nspawn-container
       vars:
         hostname: "{{inventory_hostname}}"
     - role: auto-upgrade
 
-- hosts: pihole
+- name: Setup pihole container
+  hosts: pihole
   roles:
     - role: pihole
   vars:

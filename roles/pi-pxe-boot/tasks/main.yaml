@@ -4,7 +4,6 @@
       - dnsmasq
       - nfs-kernel-server
     state: present
-  become: yes
 
 - name: base folder should exist
   ansible.builtin.file:
@@ -13,7 +12,6 @@
     owner: root
     group: root
     mode: "0755"
-  become: yes
 
 - name: setup tftproot
   ansible.builtin.file:
@@ -22,7 +20,6 @@
     owner: root
     group: root
     mode: "0755"
-  become: yes
 
 - name: dnsmasq config
   ansible.builtin.template:
@@ -31,7 +28,6 @@
     owner: root
     group: root
     mode: "0622"
-  become: yes
   notify:
     - restart dnsmasq
 
@@ -40,7 +36,6 @@
     name: dnsmasq
     state: started
     enabled: yes
-  become: yes
 
 - name: nfs exports directory
   ansible.builtin.file:
@@ -49,7 +44,6 @@
     owner: root
     group: root
     mode: "0755"
-  become: yes
 
 - name: Setup indivual hosts
   include_tasks: host-setup.yaml

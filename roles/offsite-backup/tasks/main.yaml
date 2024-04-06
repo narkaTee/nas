@@ -5,7 +5,6 @@
       - duplicity
       - python3-boto3
     state: present
-  become: yes
 
 - name: "Create backup jobs"
   ansible.builtin.template:
@@ -15,7 +14,6 @@
     group: root
     mode: "0700"
   loop: "{{ob_locations}}"
-  become: yes
 
 - name: "Create root user bin dir"
   ansible.builtin.file:
@@ -24,7 +22,6 @@
     owner: root
     group: root
     mode: "0700"
-  become: yes
 
 - name: "Create restore helper"
   ansible.builtin.template:
@@ -33,7 +30,6 @@
     owner: root
     group: root
     mode: "0700"
-  become: yes
 
 - name: "Install restore helper completion"
   ansible.builtin.copy:
@@ -42,7 +38,6 @@
     owner: root
     group: root
     mode: "0644"
-  become: yes
 
 - name: "Create duplcitity cache dir"
   ansible.builtin.file:
@@ -51,7 +46,6 @@
     owner: root
     group: root
     mode: "0700"
-  become: yes
 
 - name: "Create helper completion url cache"
   ansible.builtin.template:
@@ -60,4 +54,3 @@
     owner: root
     group: root
     mode: "0600"
-  become: yes
