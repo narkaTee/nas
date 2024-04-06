@@ -34,6 +34,8 @@ ob_locations:
   - src: /backup/
   - name: ssd-share
     src: /nas/ssd/share
+  - name: container-pihole-config
+    src: /var/lib/machines/pihole/etc/pihole
 
 nh_containers:
   - name: pihole
