@@ -1,3 +1,7 @@
+auto_upgrade_additional_origins_pattern:
+  # the 1password repo has some strange meta data
+  - "o=. stable,a=stable"
+
 dlna_server_directories:
     - path: /nas/ssd/share/MP3/Alben/
       type: A

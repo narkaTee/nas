@@ -2,6 +2,8 @@
   vars_files:
     - ./nas-settings.yaml
   roles:
+    - role: auto-upgrade
+      become: yes
     - role: dlna-server
     - role: file-server
     - role: pi-pxe-boot

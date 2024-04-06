@@ -3,6 +3,7 @@
     - role: nspawn-container
       vars:
         hostname: "{{inventory_hostname}}"
+    - role: auto-upgrade
 
 - hosts: pihole
   roles:
