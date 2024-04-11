@@ -130,3 +130,15 @@ There is a working scetch of a connection plugin:
 https://github.com/tomeon/ansible-connection-machinectl
 
 For now I just copied it and simplified it a bit.
+
+# role: nftables
+
+systemd nspawn creates and updates two tables (`io.systemd.nat` ip und ip6)
+where is creates rules needed for the container network connections.
+It also manages the port forwards there.
+
+When managing our rules we need to make sure not to flush the ruleset
+in our nft config files.
+We need to make sure we just delete the tables we want to manage.
+It also means when removing tables we have to manually clean up the
+rules!

@@ -1,0 +1,18 @@
+#!/usr/sbin/nft -f
+
+# to make sure this does not error on the first import we need to
+# create the table before we delete it.
+# The create does nothing if the table alread exists, but delete would
+# error if the table does not exist...
+table nat
+delete table nat
+
+table nat {
+	chain postrouting {
+		type nat hook postrouting priority 100;
+
+{% for rule in nftables_nat_rules | default([]) %}
+		{{ rule }}
+{% endfor %}
+	}
+}

@@ -1,0 +1,22 @@
+#!/usr/sbin/nft -f
+
+# to make sure this does not error on the first import we need to
+# create the table before we delete it.
+# The create does nothing if the table alread exists, but delete would
+# error if the table does not exist...
+table inet filter
+delete table inet filter
+
+table inet filter {
+	chain input {
+		type filter hook input priority filter;
+	}
+	chain forward {
+		type filter hook forward priority filter;
+	}
+	chain output {
+		type filter hook output priority filter;
+	}
+}
+
+include "/etc/nftables.d/tables/*"

@@ -1,0 +1,4 @@
+auto {{ ifname }}
+iface {{ ifname }} inet static
+    bridge_ports none
+    address {{ ipv4.address }}
