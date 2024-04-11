@@ -1,3 +1,8 @@
+- name: Setup static ips
+  hosts: grafana
+  roles:
+    - static-ip
+
 - name: Basic setup for nspawn containsers
   hosts: containers
   roles:

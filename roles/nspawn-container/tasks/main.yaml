@@ -1,8 +1,10 @@
 - name: Enable systemd-networkd
   ansible.builtin.service:
     name: systemd-networkd
-    enabled: yes
+    enabled: true
     state: started
+  when:
+    - systemd_networkd is not defined or systemd_networkd
 
 - name: Setup hostname
   ansible.builtin.hostname:

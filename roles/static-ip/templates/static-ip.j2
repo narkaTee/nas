@@ -1,0 +1,12 @@
+auto {{ static_ip.ifname }}
+{% if static_ip.ipv4 is defined %}
+iface {{ static_ip.ifname }} inet static
+	address {{ static_ip.ipv4.address }}
+	gateway {{ static_ip.ipv4.gateway }}
+{% endif %}
+
+{% if static_ip.ipv6 is defined %}
+iface {{ static_ip.ifname }} inet6 static
+	address {{ static_ip.ipv6.address }}
+	gateway {{ static_ip.ipv6.gateway }}
+{% endif %}

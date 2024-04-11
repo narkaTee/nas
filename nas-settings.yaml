@@ -50,3 +50,8 @@ nh_containers:
     ports:
       - tcp:8080:80
       - udp:53:53
+  - name: grafana
+    os: debian
+    bridge: priv-net
+    ports:
+      - tcp:3000:3000
