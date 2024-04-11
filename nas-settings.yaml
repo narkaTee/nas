@@ -6,8 +6,8 @@ nftables_nat_rules:
   - iifname priv-net masquerade
 
 dlna_server_directories:
-    - path: /nas/ssd/share/MP3/Alben/
-      type: A
+  - path: /nas/ssd/share/MP3/Alben/
+    type: A
 
 fs_hosts_allow: 10.143.174.0/24
 fs_workgroup: LAN
