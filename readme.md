@@ -2,7 +2,7 @@
 
 # install dependencies
 
-`ansible-galaxy install -r requirements.yml`
+`ansible-galaxy install -r requirements.yaml`
 
 # offsite backup
 

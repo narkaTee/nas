@@ -18,3 +18,13 @@
   vars:
     pihole_web_password: "{{lookup('community.general.onepassword', 'pihole', vault='nas', field='password')}}"
     pihole_dns_1: 10.143.174.1
+
+- name: Setup grafana container
+  hosts: grafana
+  roles:
+    - name: grafana.grafana.grafana
+      vars:
+        ansible_become: no
+        grafana_security:
+          admin_user: "{{lookup('community.general.onepassword', 'grafana admin', vault='nas', field='username')}}"
+          admin_password: "{{lookup('community.general.onepassword', 'grafana admin', vault='nas', field='password')}}"
