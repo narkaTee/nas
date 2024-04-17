@@ -9,3 +9,11 @@
 - name: Setup hostname
   ansible.builtin.hostname:
     name: "{{hostname}}"
+
+- name: Setup hosts file
+  ansible.builtin.template:
+    dest: /etc/hosts
+    src: hosts.j2
+    owner: root
+    group: root
+    mode: "0644"
