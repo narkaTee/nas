@@ -1,15 +1,16 @@
+---
 - name: Install dependencies
   ansible.builtin.package:
     name:
       - dnsmasq
     state: present
 
-- name: Bridge {{ ifname }} dhcp config
+- name: Bridge config {{ ifname }}
   ansible.builtin.template:
-    src: "templates/dnsmasq-dhcp.config.j2"
-    dest: "/etc/dnsmasq.d/bridge-{{ ifname }}.config"
+    src: templates/dnsmasq-dhcp.config.j2
+    dest: /etc/dnsmasq.d/bridge-{{ ifname }}.config
     owner: root
     group: root
     mode: "0622"
   notify:
-    - restart dnsmasq
+    - Restart dnsmasq

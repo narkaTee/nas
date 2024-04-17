@@ -1,3 +1,4 @@
+---
 - name: Enable nftables ruleset loading
   ansible.builtin.service:
     name: nftables
@@ -5,13 +6,13 @@
 
 - name: Create nfstables config file
   ansible.builtin.template:
-    dest: "/etc/nftables.conf"
-    src: "nftables.conf.j2"
+    dest: /etc/nftables.conf
+    src: nftables.conf.j2
     owner: root
     group: root
     mode: "0633"
     validate: nft -cf %s
-  notify: reload nftables
+  notify: Reload nftables
 
 - name: Create directories
   ansible.builtin.file:
@@ -26,10 +27,10 @@
 
 - name: Setup nat rules
   ansible.builtin.template:
-    dest: "/etc/nftables.d/tables/nat.conf"
-    src: "nat.conf.j2"
+    dest: /etc/nftables.d/tables/nat.conf
+    src: nat.conf.j2
     owner: root
     group: root
     mode: "0733"
     validate: nft -cf %s
-  notify: reload nftables
+  notify: Reload nftables

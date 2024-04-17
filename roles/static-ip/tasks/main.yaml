@@ -1,15 +1,16 @@
+---
 - name: Create interface file
   ansible.builtin.template:
-    dest: "/etc/network/interfaces.d/static-{{ static_ip.ifname }}"
-    src: "static-ip.j2"
+    dest: /etc/network/interfaces.d/static-{{ static_ip.ifname }}
+    src: static-ip.j2
     owner: root
     group: root
     mode: "0633"
   register: interface_file
 
-- name: "Shutdown {{ static_ip.ifname }}"
-  ansible.builtin.command: "ifdown {{ static_ip.ifname }}"
+- name: Shutdown {{ static_ip.ifname }}
+  ansible.builtin.command: ifdown {{ static_ip.ifname }}
   when: interface_file.changed
 
-- name: "Make sure {{ static_ip.ifname }} is up"
-  ansible.builtin.command: "ifup {{ static_ip.ifname }}"
+- name: Make sure interface is up {{ static_ip.ifname }}
+  ansible.builtin.command: ifup {{ static_ip.ifname }}

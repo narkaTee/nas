@@ -1,3 +1,4 @@
+---
 - name: Enable systemd-networkd
   ansible.builtin.service:
     name: systemd-networkd
@@ -8,7 +9,7 @@
 
 - name: Setup hostname
   ansible.builtin.hostname:
-    name: "{{hostname}}"
+    name: "{{ hostname }}"
 
 - name: Setup hosts file
   ansible.builtin.template:

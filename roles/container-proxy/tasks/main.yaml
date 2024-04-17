@@ -1,3 +1,4 @@
+---
 - name: Install dependencies
   ansible.builtin.package:
     name: nginx
@@ -6,7 +7,7 @@
   ansible.builtin.file:
     dest: /etc/nginx/sites-enabled/default
     state: absent
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Configure proxy site
   ansible.builtin.template:
@@ -15,7 +16,7 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart nginx
+  notify: Restart nginx
 
 - name: Install index file
   ansible.builtin.template:
@@ -30,4 +31,4 @@
     dest: /etc/nginx/sites-enabled/container-proxy
     src: /etc/nginx/sites-available/container-proxy
     state: link
-  notify: restart nginx
+  notify: Restart nginx

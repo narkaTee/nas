@@ -1,3 +1,4 @@
+---
 - name: Install duplicity
   ansible.builtin.package:
     name:
@@ -6,50 +7,50 @@
       - python3-boto3
     state: present
 
-- name: "Create backup jobs"
+- name: Create backup jobs
   ansible.builtin.template:
-    dest: "/etc/cron.daily/offsite-backup-{{item.name | default(item.src) | replace('/', '-') | trim('-')}}"
+    dest: /etc/cron.daily/offsite-backup-{{ item.name | default(item.src) | replace('/', '-') | trim('-') }}
     src: templates/backup-job.j2
     owner: root
     group: root
     mode: "0700"
-  loop: "{{ob_locations}}"
+  loop: "{{ ob_locations }}"
 
-- name: "Create root user bin dir"
+- name: Create root user bin dir
   ansible.builtin.file:
-    dest: "/root/bin"
+    dest: /root/bin
     state: directory
     owner: root
     group: root
     mode: "0700"
 
-- name: "Create restore helper"
+- name: Create restore helper
   ansible.builtin.template:
-    dest: "/root/bin/duplicityw"
+    dest: /root/bin/duplicityw
     src: templates/wrapper.j2
     owner: root
     group: root
     mode: "0700"
 
-- name: "Install restore helper completion"
+- name: Install restore helper completion
   ansible.builtin.copy:
-    dest: "/etc/bash_completion.d/duplicityw"
+    dest: /etc/bash_completion.d/duplicityw
     src: templates/completion
     owner: root
     group: root
     mode: "0644"
 
-- name: "Create duplcitity cache dir"
+- name: Create duplcitity cache dir
   ansible.builtin.file:
-    dest: "/root/.cache/duplicity/"
+    dest: /root/.cache/duplicity/
     state: directory
     owner: root
     group: root
     mode: "0700"
 
-- name: "Create helper completion url cache"
+- name: Create helper completion url cache
   ansible.builtin.template:
-    dest: "/root/.cache/duplicity/duplicityw_urls"
+    dest: /root/.cache/duplicity/duplicityw_urls
     src: templates/wrapper_urls.j2
     owner: root
     group: root

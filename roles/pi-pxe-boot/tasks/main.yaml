@@ -1,3 +1,4 @@
+---
 - name: Install dependencies
   ansible.builtin.package:
     name:
@@ -5,39 +6,39 @@
       - nfs-kernel-server
     state: present
 
-- name: base folder should exist
+- name: Base folder should exist
   ansible.builtin.file:
-    path: "{{pipxe_base_dir}}/"
+    path: "{{ pipxe_base_dir }}/"
     state: directory
     owner: root
     group: root
     mode: "0755"
 
-- name: setup tftproot
+- name: Setup tftproot
   ansible.builtin.file:
-    path: "{{pipxe_base_dir}}/tftproot"
+    path: "{{ pipxe_base_dir }}/tftproot"
     state: directory
     owner: root
     group: root
     mode: "0755"
 
-- name: dnsmasq config
+- name: Dnsmasq config
   ansible.builtin.template:
-    src: "templates/dnsmasq-pxe.config.j2"
-    dest: "/etc/dnsmasq.d/pipxe.config"
+    src: templates/dnsmasq-pxe.config.j2
+    dest: /etc/dnsmasq.d/pipxe.config
     owner: root
     group: root
     mode: "0622"
   notify:
-    - restart dnsmasq
+    - Restart dnsmasq
 
-- name: dnsmasq enabled an started
+- name: Dnsmasq enabled an started
   ansible.builtin.service:
     name: dnsmasq
     state: started
-    enabled: yes
+    enabled: true
 
-- name: nfs exports directory
+- name: Nfs exports directory
   ansible.builtin.file:
     dest: /etc/exports.d/
     state: directory
@@ -47,6 +48,6 @@
 
 - name: Setup indivual hosts
   include_tasks: host-setup.yaml
-  loop: "{{pipxe_hosts}}"
+  loop: "{{ pipxe_hosts }}"
   loop_control:
     loop_var: host

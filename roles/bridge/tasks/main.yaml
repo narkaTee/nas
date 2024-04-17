@@ -1,28 +1,29 @@
+---
 # we need the if-pre-up.d bridge plugin this package supplies
-- name: install depenencies
+- name: Install depenencies
   ansible.builtin.package:
     name: bridge-utils
 
 - name: Setup interface.d include
   ansible.builtin.lineinfile:
     path: /etc/network/interfaces
-    line: "source /etc/network/interfaces.d/*"
+    line: source /etc/network/interfaces.d/*
 
 - name: Setup bridge config
   ansible.builtin.template:
-    dest: "/etc/network/interfaces.d/bridge-{{ ifname }}"
-    src: "bridge-interface.j2"
+    dest: /etc/network/interfaces.d/bridge-{{ ifname }}
+    src: bridge-interface.j2
     owner: root
     group: root
     mode: "0644"
   register: bridge_config
 
 - name: Shutdown interface
-  ansible.builtin.command: "ifdown {{ ifname }}"
+  ansible.builtin.command: ifdown {{ ifname }}
   when: bridge_config.changed
 
 - name: Start interface
-  ansible.builtin.command: "ifup {{ ifname }}"
+  ansible.builtin.command: ifup {{ ifname }}
   when: bridge_config.changed
 
 - name: Setup DHCP

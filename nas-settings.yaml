@@ -1,6 +1,7 @@
+---
 auto_upgrade_additional_origins_pattern:
   # the 1password repo has some strange meta data
-  - "o=. stable,a=stable"
+  - o=. stable,a=stable
 
 nftables_nat_rules:
   - iifname priv-net masquerade
@@ -21,21 +22,23 @@ fs_shares:
 
 pipxe_interface: eth0
 # dnsmasq dhcp range that will be proxies to the other dhcp server
-pipxe_dhcp_range: "10.143.174.255"
-pipxe_base_dir: "/pipxe"
-pipxe_bootstrap_img: ".cache/pi.img"
+pipxe_dhcp_range: 10.143.174.255
+pipxe_base_dir: /pipxe
+pipxe_bootstrap_img: .cache/pi.img
 pipxe_hosts:
   - name: retropi
-    mac: "b8:27:eb:95:ec:6e"
-    serial: "6e95ec6e"
+    # old kernel
+    nfsvers: 3
+    mac: b8:27:eb:95:ec:6e
+    serial: 6e95ec6e
 
 ob_backend_base_url: boto3+s3://narkat-offsite-backups
 ob_before_backup: |
   source ~/.config/env.local.sh
 ob_aws:
-  access_key_id: "op://nas/aws-nas-user-access-key/aws_access_key_id"
-  secret_access_key: "op://nas/aws-nas-user-access-key/aws_secret_access_key"
-ob_passphrase: "op://nas/nas-backup-passphrase/passphrase"
+  access_key_id: op://nas/aws-nas-user-access-key/aws_access_key_id
+  secret_access_key: op://nas/aws-nas-user-access-key/aws_secret_access_key
+ob_passphrase: op://nas/nas-backup-passphrase/passphrase
 ob_locations:
   - src: /pipxe/
   - src: /backup/

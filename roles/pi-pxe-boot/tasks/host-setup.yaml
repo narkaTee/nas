@@ -1,39 +1,40 @@
-- name: "host {{host.name}} root"
+---
+- name: Root dir {{ host.name }}
   ansible.builtin.file:
-    path: "{{pipxe_base_dir}}/{{host.name}}-root"
+    path: "{{ pipxe_base_dir }}/{{ host.name }}-root"
     state: directory
     owner: root
     group: root
     mode: "755"
 
-- name: "host {{host.name}} boot"
+- name: Boot dir {{ host.name }}
   ansible.builtin.file:
-    path: "{{pipxe_base_dir}}/{{host.name}}-boot"
+    path: "{{ pipxe_base_dir }}/{{ host.name }}-boot"
     state: directory
     owner: root
     group: root
     mode: "755"
 
-- name: "host {{host.name}} tftp"
+- name: Tftp link {{ host.name }}
   ansible.builtin.file:
-    path: "{{pipxe_base_dir}}/tftproot/{{host.serial}}"
+    path: "{{ pipxe_base_dir }}/tftproot/{{ host.serial }}"
     state: link
-    src: "../{{host.name}}-boot"
+    src: ../{{ host.name }}-boot
     owner: root
     group: root
 
-- name: check for cmdlint.txt in boot volume
+- name: Check for cmdlint.txt in boot volume
   ansible.builtin.stat:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-boot/cmdline.txt"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-boot/cmdline.txt"
   register: pipxe_boot_cmd
 
-- name: check for fstab in root volume
+- name: Check for fstab in root volume
   ansible.builtin.stat:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/fstab"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/fstab"
   register: pipxe_root_fstab
 
 - name: Mount image
-  ansible.builtin.command: "kpartx -av {{pipxe_bootstrap_img}}"
+  ansible.builtin.command: kpartx -av {{ pipxe_bootstrap_img }}
   when: not pipxe_boot_cmd.stat.exists or not pipxe_root_fstab.stat.exists
 
 - name: Extract /boot and / from image
@@ -42,122 +43,123 @@
     - name: Create temporary bootstrap directory
       ansible.builtin.tempfile:
         state: directory
-        prefix: "pxepi_bootstrap"
+        prefix: pxepi_bootstrap
       register: pipxe_bootstrap
 
     - name: Create boot mount point
       ansible.builtin.file:
-        dest: "{{pipxe_bootstrap.path}}/boot"
+        dest: "{{ pipxe_bootstrap.path }}/boot"
         state: directory
 
     - name: Create root mount point
       ansible.builtin.file:
-        dest: "{{pipxe_bootstrap.path}}/root"
+        dest: "{{ pipxe_bootstrap.path }}/root"
         state: directory
 
-    - name: Mount boot
-      ansible.builtin.command: "mount /dev/mapper/loop0p1 {{pipxe_bootstrap.path}}/boot"
+    - name: Mount boot  # noqa command-instead-of-module
+      ansible.builtin.command: mount /dev/mapper/loop0p1 {{ pipxe_bootstrap.path }}/boot
 
-    - name: Mount root
-      ansible.builtin.command: "mount /dev/mapper/loop0p2 {{pipxe_bootstrap.path}}/root"
+
+    - name: Mount root  # noqa command-instead-of-module
+      ansible.builtin.command: mount /dev/mapper/loop0p2 {{ pipxe_bootstrap.path }}/root
 
     - name: Copy boot
-      ansible.builtin.shell: "cp -a {{pipxe_bootstrap.path}}/boot/* {{pipxe_base_dir}}/{{host.name}}-boot"
+      ansible.builtin.shell: cp -a {{ pipxe_bootstrap.path }}/boot/* {{ pipxe_base_dir }}/{{ host.name }}-boot
       when: not pipxe_boot_cmd.stat.exists
 
     - name: Copy root
-      ansible.builtin.shell: "cp -a {{pipxe_bootstrap.path}}/root/* {{pipxe_base_dir}}/{{host.name}}-root"
+      ansible.builtin.shell: cp -a {{ pipxe_bootstrap.path }}/root/* {{ pipxe_base_dir }}/{{ host.name }}-root
       when: not pipxe_root_fstab.stat.exists
   always:
-    - name: unmount boot
-      ansible.builtin.command: "umount {{pipxe_bootstrap.path}}/boot"
-    - name: unmount root
-      ansible.builtin.command: "umount {{pipxe_bootstrap.path}}/root"
+    - name: Unmount boot
+      ansible.builtin.command: umount {{ pipxe_bootstrap.path }}/boot
+    - name: Unmount root
+      ansible.builtin.command: umount {{ pipxe_bootstrap.path }}/root
     - name: Unmap image
-      ansible.builtin.command: "kpartx -d {{pipxe_bootstrap_img}}"
+      ansible.builtin.command: kpartx -d {{ pipxe_bootstrap_img }}
 
-- name: configure hostname
+- name: Configure hostname
   ansible.builtin.copy:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/hostname"
-    content: "{{host.name}}\n"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/hostname"
+    content: "{{ host.name }}\n"
 
-- name: configure hostname in /etc/hosts
+- name: Configure hostname in /etc/hosts
   ansible.builtin.lineinfile:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/hosts"
-    regexp: '^127.0.1.1\s+raspberrypi$'
-    line: "127.0.1.1               {{host.name}}"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/hosts"
+    regexp: ^127.0.1.1\s+raspberrypi$
+    line: 127.0.1.1               {{ host.name }}
 
-- name: enable ssh
+- name: Enable ssh
   ansible.builtin.file:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/systemd/system/multi-user.target.wants/ssh.service"
-    src: "/lib/systemd/system/ssh.service"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/systemd/system/multi-user.target.wants/ssh.service"
+    src: /lib/systemd/system/ssh.service
     owner: root
     group: root
     state: link
 
-- name: create .ssh folder for root
+- name: Create .ssh folder for root
   ansible.builtin.file:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/root/.ssh"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/root/.ssh"
     owner: root
     group: root
     state: directory
     mode: "0700"
 
-- name: make sure keys are present
+- name: Make sure keys are present
   ansible.builtin.copy:
     src: ~/.ssh/authorized_keys
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/root/.ssh/authorized_keys"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/root/.ssh/authorized_keys"
     owner: root
     group: root
     mode: "0600"
 
-- name: disable userconfig during first boot
+- name: Disable userconfig during first boot
   ansible.builtin.file:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/systemd/system/multi-user.target.wants/userconfig.service"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/systemd/system/multi-user.target.wants/userconfig.service"
     state: absent
 
-- name: disable resize operation on boot
+- name: Disable resize operation on boot
   ansible.builtin.file:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/init.d/resize2fs_once"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/init.d/resize2fs_once"
     state: absent
 
-- name: keyboard layout
+- name: Keyboard layout
   ansible.builtin.template:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/default/keyboard"
-    src: "templates/keyboard.j2"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/default/keyboard"
+    src: templates/keyboard.j2
     owner: root
     group: root
     mode: "0644"
 
 - name: Bootloader config
   ansible.builtin.template:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-boot/cmdline.txt"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-boot/cmdline.txt"
     src: templates/cmdline.txt.j2
   vars:
-    host_ip: "{{ansible_facts[pipxe_interface].ipv4.address}}"
+    host_ip: "{{ ansible_facts[pipxe_interface].ipv4.address }}"
 
-- name: fstab config
+- name: Fstab config
   ansible.builtin.template:
-    dest: "{{pipxe_base_dir}}/{{host.name}}-root/etc/fstab"
+    dest: "{{ pipxe_base_dir }}/{{ host.name }}-root/etc/fstab"
     src: templates/fstab.j2
   vars:
-    host_ip: "{{ansible_facts[pipxe_interface].ipv4.address}}"
+    host_ip: "{{ ansible_facts[pipxe_interface].ipv4.address }}"
 
-- name: nfs exports
+- name: Nfs exports
   ansible.builtin.template:
-    dest: /etc/exports.d/pipxe-{{host.name}}.exports
+    dest: /etc/exports.d/pipxe-{{ host.name }}.exports
     src: templates/nfs-host.export.j2
     mode: "0655"
-  notify: restart nfs server
+  notify: Restart nfs server
 
-- name: check for bootcode in tftproot
+- name: Check for bootcode in tftproot
   ansible.builtin.stat:
-    dest: "{{pipxe_base_dir}}/tftproot/bootcode.bin"
+    dest: "{{ pipxe_base_dir }}/tftproot/bootcode.bin"
   register: pipxe_bootcode
 
-- name: copy bootcode to tftproot
+- name: Copy bootcode to tftproot
   when: not pipxe_bootcode.stat.exists
   ansible.builtin.copy:
-    src: "{{pipxe_base_dir}}/{{host.name}}-boot/bootcode.bin"
-    dest: "{{pipxe_base_dir}}/tftproot/bootcode.bin"
-    remote_src: yes
+    src: "{{ pipxe_base_dir }}/{{ host.name }}-boot/bootcode.bin"
+    dest: "{{ pipxe_base_dir }}/tftproot/bootcode.bin"
+    remote_src: true

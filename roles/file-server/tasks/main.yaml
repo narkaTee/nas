@@ -1,3 +1,4 @@
+---
 - name: Install Samba
   ansible.builtin.package:
     name: samba
@@ -9,22 +10,22 @@
     group: nas
     create_home: false
     shell: /usr/sbin/nologin
-    system: yes
+    system: true
   register: guest_user
 
 - name: Samba config
   ansible.builtin.template:
     src: ../templates/smb.conf.j2
     dest: /etc/samba/smb.conf
-    mode: '0644'
+    mode: "0644"
   become: true
   notify:
-    - restart smbd
+    - Restart smbd
 
 - name: Share permissions
   ansible.builtin.file:
-    dest: "{{item.path}}"
-    owner: "{{guest_user.name}}"
-    group: "{{guest_user.group}}"
+    dest: "{{ item.path }}"
+    owner: "{{ guest_user.name }}"
+    group: "{{ guest_user.group }}"
     mode: "0765"
-  loop: "{{fs_shares}}"
+  loop: "{{ fs_shares }}"

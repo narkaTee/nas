@@ -1,9 +1,10 @@
-- name: restart dnsmasq
+---
+- name: Restart dnsmasq
   ansible.builtin.service:
     name: dnsmasq
     state: restarted
 
-- name: restart nfs server
+- name: Restart nfs server
   ansible.builtin.service:
     name: nfs-server
     state: restarted

@@ -1,4 +1,6 @@
-- hosts: nas_host
+---
+- name: Setup nas
+  hosts: nas_host
   become: true
   vars_files:
     - ./nas-settings.yaml

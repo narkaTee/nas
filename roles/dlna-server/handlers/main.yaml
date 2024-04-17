@@ -1,8 +1,9 @@
-- name: apply sysctl
+---
+- name: Apply sysctl
   ansible.builtin.command: sysctl --system
   become: true
 
-- name: restart minidlna
+- name: Restart minidlna
   ansible.builtin.service:
     name: minidlna
     state: restarted

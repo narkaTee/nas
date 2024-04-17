@@ -1,26 +1,26 @@
+---
 - name: Install systemd-containers and debbootstrap
   ansible.builtin.package:
     name:
       - systemd-container
       - debootstrap
 
-- name: make sure nspawn settings directy exists
+- name: Make sure nspawn settings directy exists
   ansible.builtin.file:
     dest: /etc/systemd/nspawn/
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
     state: directory
 
 - name: Enable systemd-networkd
   ansible.builtin.service:
     name: systemd-networkd
-    enabled: yes
+    enabled: true
     state: started
 
-
-- name: "Create containers"
-  ansible.builtin.include_tasks: "{{container.os | default('debian')}}-container.yaml"
-  loop: "{{nh_containers}}"
+- name: Create containers
+  ansible.builtin.include_tasks: "{{ container.os | default('debian') }}-container.yaml"
+  loop: "{{ nh_containers }}"
   loop_control:
     loop_var: container
