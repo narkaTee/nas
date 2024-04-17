@@ -18,3 +18,54 @@
     - role: pi-pxe-boot
     - role: offsite-backup
     - role: nspawn-host
+    - role: container-proxy
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.service:
+        name: prometheus-node-exporter
+        state: restarted
+
+    - name: Restart node exporter
+      ansible.builtin.service:
+        name: prometheus-node-exporter
+        state: restarted
+
+  tasks:
+    - name: Install node exporter
+      ansible.builtin.package:
+        name: prometheus-node-exporter
+
+    - name: Listen only on private interface
+      ansible.builtin.copy:
+        dest: /etc/prometheus.conf
+        content: |
+          ARGS="--web.listen-address=192.168.1.1:9100 --collector.systemd --collector.processes"
+      notify:
+        - Reload systemd
+        - Restart node exporter
+
+    - name: Create override dir
+      ansible.builtin.file:
+        dest: /etc/systemd/system/prometheus-node-exporter.service.d/
+        state: directory
+        owner: root
+        group: root
+        mode: "0744"
+
+    - name: Settings override
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/prometheus-node-exporter.service.d/override.conf
+        content: |
+          [Service]
+          EnvironmentFile=/etc/prometheus.conf
+      notify:
+        - Reload systemd
+        - Restart node exporter
+
+    # The node-exporter depends on ipmitools -> openipmi which tries to
+    # start during boot and fails becuase there is not ipmi chip...
+    - name: Disable openipmi service
+      ansible.builtin.service:
+        name: openipmi
+        enabled: false

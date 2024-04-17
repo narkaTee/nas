@@ -142,3 +142,9 @@ in our nft config files.
 We need to make sure we just delete the tables we want to manage.
 It also means when removing tables we have to manually clean up the
 rules!
+
+# Grafana + Prometheus
+
+- https://github.com/grafana/grafana-ansible-collection/tree/main/roles/grafana
+- https://grafana.com/tutorials/run-grafana-behind-a-proxy/
+- https://github.com/prometheus-community/ansible

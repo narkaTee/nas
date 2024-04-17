@@ -1,0 +1,37 @@
+# vim: ft=nginx
+{% if 'grafana' in container_proxy_routes | map(attribute="type") %}
+map $http_upgrade $connection_upgrade {
+	default upgrade;
+	'' close;
+}
+{% endif %}
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	server_name _;
+
+	root /var/www/html/;
+	index index.html;
+
+{% for route in container_proxy_routes %}
+{% set _type = route.type | default("simple") %}
+{% if _type == "simple" %}
+	location {{ route.path }} {
+		proxy_pass {{ route.backend }};
+	}
+{% elif _type == "grafana" %}
+	location {{ route.path.rstrip("/") }}/ {
+		proxy_pass {{ route.backend }};
+		proxy_set_header Host $host;
+	}
+	location {{ route.path.rstrip("/") }}/api/live/ {
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $connection_upgrade;
+		proxy_set_header Host $host;
+		proxy_pass {{ route.backend }};
+		rewrite  ^/grafana/(.*)  /$1 break;
+	}
+{% endif %}
+{% endfor %}
+}

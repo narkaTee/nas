@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Container Proxy Index</title>
+    </head>
+    <body>
+        <ul>
+            {% for route in container_proxy_routes %}
+            <li><a href="{{ route.path }}">{{ route.path }}</a></li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

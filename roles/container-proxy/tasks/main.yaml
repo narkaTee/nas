@@ -1,0 +1,33 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name: nginx
+
+- name: Disable default site
+  ansible.builtin.file:
+    dest: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
+- name: Configure proxy site
+  ansible.builtin.template:
+    dest: /etc/nginx/sites-available/container-proxy
+    src: container-proxy.j2
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nginx
+
+- name: Install index file
+  ansible.builtin.template:
+    dest: /var/www/html/index.html
+    src: index.html.j2
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable proxy site
+  ansible.builtin.file:
+    dest: /etc/nginx/sites-enabled/container-proxy
+    src: /etc/nginx/sites-available/container-proxy
+    state: link
+  notify: restart nginx

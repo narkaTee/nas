@@ -55,3 +55,11 @@ nh_containers:
     bridge: priv-net
     ports:
       - tcp:3000:3000
+
+container_proxy_routes:
+  - path: /grafana
+    backend: http://192.168.1.10:3000/
+    type: grafana
+  - path: /prometheus
+    # no trailing / otherwise redirect loop
+    backend: http://192.168.1.10:9090

@@ -2,3 +2,4 @@ collections:
   - name: community.general
     version: 8.5.0
   - name: grafana.grafana
+  - name: prometheus.prometheus
