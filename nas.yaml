@@ -7,6 +7,7 @@
   roles:
     - role: nftables
     - role: bridge
+    - role: exim4_mail_relay
     - role: auto-upgrade
     - role: dlna-server
     - role: file-server

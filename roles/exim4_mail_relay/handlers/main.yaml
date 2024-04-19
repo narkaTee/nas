@@ -1,0 +1,6 @@
+- name: Regenrate config
+  ansible.builtin.command: update-exim4.conf
+- name: Restart exim4
+  ansible.builtin.service:
+    name: exim4
+    state: restarted

@@ -1,0 +1,35 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name: exim4
+
+- name: Configure update-exim4.conf
+  ansible.builtin.template:
+    dest: /etc/exim4/update-exim4.conf.conf
+    src: update-exim4.conf.conf.j2
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Regenrate config
+    - Restart exim4
+
+- name: Configure mailname
+  ansible.builtin.copy:
+    dest: /etc/mailname
+    content: |
+      {{ exim4_mail_relay_mailname }}
+
+- name: Configure credentials
+  ansible.builtin.template:
+    dest: /etc/exim4/passwd.client
+    src: passwd.client.j2
+    owner: root
+    group: Debian-exim
+    mode: "0640"
+  when: exim4_mail_relay_passwd is defined
+
+- name: Service is started and enabled
+  ansible.builtin.service:
+    name: exim4
+    enabled: true
+    state: started

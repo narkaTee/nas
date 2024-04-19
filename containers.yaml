@@ -11,6 +11,11 @@
       vars:
         hostname: "{{ inventory_hostname }}"
     - role: auto-upgrade
+    - role: exim4_mail_relay
+      vars:
+        exim4_mail_relay_mailname: "{{ inventory_hostname }}"
+        exim4_mail_relay_readhost: "wollawurst.info"
+        exim4_mail_relay_smarthost: 192.168.1.1
 
 - name: Setup pihole container
   hosts: pihole
