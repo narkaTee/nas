@@ -71,6 +71,8 @@ ob_locations:
     src: /nas/ssd/share
   - name: container-pihole-config
     src: /var/lib/machines/pihole/etc/pihole
+  - name: container-grafana-config
+    src: /var/lib/machines/grafana/var/lib/grafana/
 
 nh_containers:
   - name: pihole
