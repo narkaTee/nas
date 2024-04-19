@@ -1,4 +1,4 @@
 bind-interfaces
-interface={{ ifname }}
-dhcp-range={{ dhcp.range_start }},{{ dhcp.range_end }}
+interface={{ bridge.ifname }}
+dhcp-range={{ bridge.dhcp.range_start }},{{ bridge.dhcp.range_end }}
 log-dhcp

@@ -9,23 +9,8 @@
     path: /etc/network/interfaces
     line: source /etc/network/interfaces.d/*
 
-- name: Setup bridge config
-  ansible.builtin.template:
-    dest: /etc/network/interfaces.d/bridge-{{ ifname }}
-    src: bridge-interface.j2
-    owner: root
-    group: root
-    mode: "0644"
-  register: bridge_config
-
-- name: Shutdown interface
-  ansible.builtin.command: ifdown {{ ifname }}
-  when: bridge_config.changed
-
-- name: Start interface
-  ansible.builtin.command: ifup {{ ifname }}
-  when: bridge_config.changed
-
-- name: Setup DHCP
-  ansible.builtin.import_tasks: dhcp.yaml
-  when: dhcp
+- name: Create bridges
+  ansible.builtin.include_tasks: "bridge.yaml"
+  loop: "{{ bridge_bridges }}"
+  loop_control:
+    loop_var: bridge

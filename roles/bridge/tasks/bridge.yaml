@@ -1,0 +1,20 @@
+- name: Setup bridge config
+  ansible.builtin.template:
+    dest: /etc/network/interfaces.d/bridge-{{ bridge.ifname }}
+    src: bridge-interface.j2
+    owner: root
+    group: root
+    mode: "0644"
+  register: bridge_config
+
+- name: Shutdown interface
+  ansible.builtin.command: ifdown {{ bridge.ifname }}
+  when: bridge_config.changed
+
+- name: Start interface
+  ansible.builtin.command: ifup {{ bridge.ifname }}
+  when: bridge_config.changed
+
+- name: Setup DHCP
+  ansible.builtin.import_tasks: dhcp.yaml
+  when: bridge.dhcp
