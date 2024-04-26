@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+folder="$1"
+files="$2"
+
+if [ $# -lt 2 ]; then
+    echo "Too few arguments need 2!"
+    exit 1
+fi
+
+echo "Creating $files in folder $folder"
+
+for ((i = 1; i <= $files; i++)); do
+    file="$folder/disk-$i"
+    truncate -s 100MB $file
+done

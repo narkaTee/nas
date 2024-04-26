@@ -1,0 +1,16 @@
+- name: Install backports repo
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/backports.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      deb http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports {{ debian_backports_archives }}
+      deb-src http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports {{ debian_backports_archives }}
+  when: debian_backports_enabled
+
+- name: Remove backports repo
+  ansible.builtin.file:
+    dest: /etc/apt/sources.list.d/backports.list
+    state: absent
+  when: not debian_backports_enabled

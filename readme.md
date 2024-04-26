@@ -1,5 +1,39 @@
 # nas config
 
+# ZFS
+
+## kernel modules/dkms and Secure Boot
+
+To load kernel modules with secure boot enabled the Machine Owner
+Key (MOK) dkms uses to sign modules needs to be registered.
+
+The kernel modules build by dkms also need to signed, this seems to be
+automatically setup bei debian (bookworm).
+
+```sh
+# list enrolled keys
+mokutil --list-enrolled
+
+# debian seems to create moks keys in /var/lib/dkms/
+# I don't how ho stable this location is and what lifecycle applies to
+# this keys. We'll find out over time ;)
+sudo mokutil --import /var/lib/dkms/mok.pub
+```
+
+The import might fail on older mainboard because the firmware does not
+implement all uefi functions for that command to work.
+The workararound is to import the key manually in the bios.
+
+Reboot the machine, enter the BIOS setup, use "advanced mode" and
+navigate to Boot/SecureBoot/ManageKeys menus.
+
+The key goes in the 'db' repository.
+The Menu might be awkwardly structured read carefully what ths yes/no
+options will do. On my old asus board "no" is the options to append a
+key from a disk.
+
+See also: https://stackoverflow.com/questions/39226185/kernel-module-mokutil-failed-to-enroll-new-keys
+
 # install dependencies
 
 `ansible-galaxy install -r requirements.yaml`

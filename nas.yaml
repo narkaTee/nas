@@ -15,6 +15,9 @@
     - role: offsite-backup
     - role: nspawn-host
     - role: container-proxy
+    - role: debian_backports
+      vars:
+        debian_backports_archives: main contrib
 
   handlers:
     - name: Reload systemd
@@ -65,3 +68,10 @@
       ansible.builtin.service:
         name: openipmi
         enabled: false
+
+    - name: Install zfs
+      ansible.builtin.package:
+        name:
+          - linux-headers-amd64
+          - zfsutils-linux
+          - zfs-dkms
