@@ -91,5 +91,7 @@ container_proxy_routes:
   - path: /prometheus
     # no trailing / otherwise redirect loop
     backend: http://192.168.1.10:9090
+  - path: /alertmanager
+    backend: http://192.168.1.10:9093
   - path: /pihole/
     backend: http://192.168.1.5/admin/

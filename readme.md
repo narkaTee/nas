@@ -182,3 +182,5 @@ rules!
 - https://github.com/grafana/grafana-ansible-collection/tree/main/roles/grafana
 - https://grafana.com/tutorials/run-grafana-behind-a-proxy/
 - https://github.com/prometheus-community/ansible
+- https://github.com/prometheus-community/ansible/tree/main/roles/prometheus
+- https://github.com/prometheus-community/ansible/tree/main/roles/alertmanager

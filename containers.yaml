@@ -24,4 +24,5 @@
   hosts: grafana
   roles:
     - prometheus.prometheus.prometheus
+    - prometheus.prometheus.alertmanager
     - grafana.grafana.grafana
