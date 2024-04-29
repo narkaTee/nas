@@ -1,9 +1,7 @@
 ---
 - name: Setup nas
-  hosts: nas_host
+  hosts: nas
   become: true
-  vars_files:
-    - ./nas-settings.yaml
   roles:
     - role: nftables
     - role: bridge

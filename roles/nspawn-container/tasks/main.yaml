@@ -7,6 +7,20 @@
   when:
     - systemd_networkd is not defined or systemd_networkd
 
+- name: Stop systemd-networkd
+  ansible.builtin.service:
+    name: systemd-networkd
+    state: stopped
+  when:
+    - systemd_networkd is defined and not systemd_networkd
+
+- name: Disable systemd-networkd
+  ansible.builtin.service:
+    name: systemd-networkd
+    enabled: false
+  when:
+    - systemd_networkd is defined and not systemd_networkd
+
 - name: Setup hostname
   ansible.builtin.hostname:
     name: "{{ hostname }}"

@@ -1,6 +1,8 @@
 ---
 - name: Setup static ips
-  hosts: grafana
+  hosts:
+    - grafana
+    - pihole
   roles:
     - static-ip
 
@@ -12,23 +14,14 @@
         hostname: "{{ inventory_hostname }}"
     - role: auto-upgrade
     - role: exim4_mail_relay
-      vars:
-        exim4_mail_relay_mailname: "{{ inventory_hostname }}"
-        exim4_mail_relay_readhost: "wollawurst.info"
-        exim4_mail_relay_smarthost: 192.168.1.1
 
 - name: Setup pihole container
   hosts: pihole
   roles:
     - role: pihole
-  vars:
-    pihole_web_password: "{{lookup('community.general.onepassword', 'pihole', vault='nas', field='password')}}"
-    pihole_dns_1: "10.143.174.1"
 
 - name: Setup grafana container
   hosts: grafana
-  vars_files:
-    - containers/grafana-settings.yaml
   roles:
     - prometheus.prometheus.prometheus
     - grafana.grafana.grafana

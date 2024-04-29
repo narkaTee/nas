@@ -18,6 +18,11 @@ server {
 {% if _type == "simple" %}
 	location {{ route.path }} {
 		proxy_pass {{ route.backend }};
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_hide_header X-Frame-Options;
+		proxy_set_header X-Frame-Options "SAMEORIGIN";
 	}
 {% elif _type == "grafana" %}
 	location {{ route.path.rstrip("/") }}/ {

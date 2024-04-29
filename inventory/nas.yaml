@@ -1,9 +1,5 @@
 ---
 all:
   hosts:
-    localhost:
+    nas:
       ansible_connection: local
-  children:
-    nas_host:
-      hosts:
-        localhost:

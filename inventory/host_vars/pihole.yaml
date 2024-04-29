@@ -1,0 +1,10 @@
+systemd_networkd: false
+
+static_ip:
+  ifname: host0
+  ipv4:
+    address: 192.168.1.5/24
+    gateway: 192.168.1.1
+
+pihole_web_password: "{{ lookup('community.general.onepassword', 'pihole', vault='nas', field='password') }}"
+pihole_dns_1: "10.143.174.1"

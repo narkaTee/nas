@@ -2,6 +2,14 @@
 # we are already root when connecting via machinectl and sudo is not installed
 ansible_become: false
 
+systemd_networkd: false
+
+static_ip:
+  ifname: host0
+  ipv4:
+    address: 192.168.1.10/24
+    gateway: 192.168.1.1
+
 prometheus_web_external_url: /prometheus
 prometheus_targets:
   node:
@@ -10,8 +18,8 @@ prometheus_targets:
 
 grafana_url: http://0.0.0.0/grafana/
 grafana_security:
-  admin_user: "{{lookup('community.general.onepassword', 'grafana admin', vault='nas', field='username')}}"
-  admin_password: "{{lookup('community.general.onepassword', 'grafana admin', vault='nas', field='password')}}"
+  admin_user: "{{ lookup('community.general.onepassword', 'grafana admin', vault='nas', field='username') }}"
+  admin_password: "{{ lookup('community.general.onepassword', 'grafana admin', vault='nas', field='password') }}"
 grafana_datasources:
   - name: prometheus
     type: prometheus

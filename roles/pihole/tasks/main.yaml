@@ -1,10 +1,4 @@
 ---
-- name: Enable systemd-networkd to enable networking
-  ansible.builtin.service:
-    name: systemd-networkd
-    enabled: true
-    state: started
-
 - name: Install git
   ansible.builtin.package:
     name:

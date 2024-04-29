@@ -7,12 +7,6 @@ all:
     grafana:
       ansible_connection: machinectl
       ansible_host: grafana
-      systemd_networkd: false
-      static_ip:
-        ifname: host0
-        ipv4:
-          address: 192.168.1.10/24
-          gateway: 192.168.1.1
   children:
     containers:
       hosts:
