@@ -1,0 +1,11 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - cups
+      - printer-driver-gutenprint
+
+# The rest is awkwards to automate, usally it is done via clicking in
+# the cups interface. I think thr printer config contains some very
+# specific information cups detects during printer setup via the web
+# interface

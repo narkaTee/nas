@@ -1,0 +1,7 @@
+---
+- name: Setup pi01
+  hosts: pi01
+  become: true
+  roles:
+    - role: exim4_mail_relay
+    - role: print_server

@@ -3,6 +3,8 @@ all:
   hosts:
     nas:
       ansible_connection: local
+    pi01:
+      ansible_connection: ssh
     pihole:
       ansible_connection: machinectl
       ansible_host: pihole
@@ -14,3 +16,7 @@ all:
       hosts:
         pihole:
         grafana:
+    internet_mail_relay:
+      hosts:
+        nas:
+        pi01:
