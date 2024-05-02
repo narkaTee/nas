@@ -1,5 +1,0 @@
----
-all:
-  hosts:
-    nas:
-      ansible_connection: local

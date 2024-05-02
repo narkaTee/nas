@@ -1,6 +1,8 @@
 ---
 all:
   hosts:
+    nas:
+      ansible_connection: local
     pihole:
       ansible_connection: machinectl
       ansible_host: pihole
