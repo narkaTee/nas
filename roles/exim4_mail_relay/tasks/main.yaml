@@ -33,3 +33,11 @@
     name: exim4
     enabled: true
     state: started
+
+- name: Configure aliases
+  ansible.builtin.lineinfile:
+    path: /etc/aliases
+    regexp: '^{{ item.name }}:'
+    line: "{{ item.name }}: {{ item.alias }}"
+  loop: "{{ exim4_mail_relay_aliases }}"
+  when: exim4_mail_relay_aliases is defined

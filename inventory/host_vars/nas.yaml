@@ -30,6 +30,9 @@ exim4_mail_relay_additional_interfaces:
   - 192.168.1.1
 exim4_mail_relay_nets:
   - 192.168.1.1/24
+exim4_mail_relay_aliases:
+  - name: root
+    alias: "{{ lookup('community.general.onepassword', 'root-alias', vault='nas', field='alias') }}"
 
 dlna_server_directories:
   - path: /nas/ssd/share/MP3/Alben/
