@@ -184,3 +184,17 @@ rules!
 - https://github.com/prometheus-community/ansible
 - https://github.com/prometheus-community/ansible/tree/main/roles/prometheus
 - https://github.com/prometheus-community/ansible/tree/main/roles/alertmanager
+
+## Node Exporter
+
+The `prometheus-node-exporter` package automatically installs and
+configures the textfile exporter from the [prometheus-community](https://github.com/prometheus-community/node-exporter-textfile-collector-scripts).
+
+The textfile collector folder is: `/var/lib/prometheus/node-exporter`
+
+### SMART
+
+Useful dashboards:
+
+- https://grafana.com/grafana/dashboards/10664-smart-disk-data/ (removing the extended labels from the queries 👌)
+- https://grafana.com/grafana/dashboards/3992-smartmon/ just raw data

@@ -10,3 +10,20 @@ groups:
         for: 5m
         labels:
           severity: warning
+
+      - alert: SmartDeviceUnhealthy
+        annotations:
+          message: '{% raw %}SMART Device ({{ $labels.disk }}) on {{ $labels.instance }} unhealthy!{% endraw %}'
+          summary: 'SMART Device unhealthy.'
+        expr: smartmon_device_smart_healthy < 1
+        for: 15m
+        labels:
+          severity: critical
+      - alert: SmartDeviceWearLevelingLow
+        annotations:
+          message: '{% raw %}SMART Device ({{ $labels.disk }}) on {{ $labels.instance }} wear leveling low: {{ $value }}/100{% endraw %}'
+          summary: 'SMART Device wear leveling low'
+        expr: smartmon_wear_leveling_count_value < 40
+        for: 15m
+        labels:
+          severity: warning

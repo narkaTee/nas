@@ -33,7 +33,7 @@
       ansible.builtin.package:
         name: prometheus-node-exporter
 
-    - name: Listen only on private interface
+    - name: Configure node exporter
       ansible.builtin.copy:
         dest: /etc/prometheus.conf
         content: |
