@@ -5,6 +5,18 @@ map $http_upgrade $connection_upgrade {
 	'' close;
 }
 {% endif %}
+
+{% for route in container_proxy_routes %}
+{% if route.type is defined and route.type == "pihole" %}
+map $upstream_http_location $replace_location_{{ route.path.replace('/', '') }} {
+	"" "";
+	"/admin/" "/pihole/";
+	"~^/(.*)$" "/pihole/$1";
+	"~^(.*)$" "/pihole/$1";
+}
+{% endif %}
+{% endfor %}
+
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
@@ -23,6 +35,18 @@ server {
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_hide_header X-Frame-Options;
 		proxy_set_header X-Frame-Options "SAMEORIGIN";
+	}
+{% elif _type == "pihole" %}
+	location {{ route.path }} {
+		proxy_pass {{ route.backend }};
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_hide_header X-Frame-Options;
+		proxy_set_header X-Frame-Options "SAMEORIGIN";
+		# we need to rewrite the location header pihole returns
+		proxy_hide_header Location;
+		add_header Location $replace_location_{{ route.path.replace('/', '') }};
 	}
 {% elif _type == "grafana" %}
 	location {{ route.path.rstrip("/") }}/ {
