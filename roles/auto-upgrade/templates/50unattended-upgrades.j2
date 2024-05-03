@@ -2,11 +2,11 @@
 
 // to check against repos: apt-cache policy
 Unattended-Upgrade::Origins-Pattern {
-        "o=${distro_id},n=${distro_codename}";
-        "o=${distro_id},n=${distro_codename}-security";
-        "o=${distro_id},n=${distro_codename}-updates";
+{% for pattern in auto_upgrades_origins_pattern | default([]) %}
+        "{{pattern}}";
+{% endfor %}
 {% for pattern in auto_upgrades_additional_origins_pattern | default([]) %}
-        "{{pattern}}"
+        "{{pattern}}";
 {% endfor %}
 }
 

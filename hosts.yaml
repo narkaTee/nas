@@ -3,5 +3,6 @@
   hosts: pi01
   become: true
   roles:
+    - role: auto-upgrade
     - role: exim4_mail_relay
     - role: print_server

@@ -1,0 +1,3 @@
+auto_upgrades_origins_pattern:
+  - "origin=${distro_id},codename=${distro_codename}"
+  - "origin=Raspberry Pi Foundation,codename=${distro_codename}"

@@ -1,2 +1,6 @@
 ---
 auto_upgrade_mail: root
+auto_upgrades_origins_pattern:
+  - "o=${distro_id},n=${distro_codename}"
+  - "o=${distro_id},n=${distro_codename}-security"
+  - "o=${distro_id},n=${distro_codename}-updates"
