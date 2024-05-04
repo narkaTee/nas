@@ -1,5 +1,5 @@
 ---
-auto_upgrade_additional_origins_pattern:
+auto_upgrades_additional_origins_pattern:
   # the 1password repo has some strange meta data
   - o=. stable,a=stable
 
