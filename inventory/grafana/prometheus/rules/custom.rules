@@ -27,3 +27,12 @@ groups:
         for: 15m
         labels:
           severity: warning
+
+      - alert: PendingPackageUpdates
+        annotations:
+          message: '{% raw %}Host {{ $labels.instance }} has pending package updates.{% endraw %}'
+          summary: 'Pending package updates'
+        expr: apt_upgrades_pending > 0
+        for: 2d
+        labels:
+          severity: warning
