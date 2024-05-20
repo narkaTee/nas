@@ -9,3 +9,8 @@
 # the cups interface. I think thr printer config contains some very
 # specific information cups detects during printer setup via the web
 # interface
+
+- name: Setup scan server
+  ansible.builtin.include_tasks:
+    file: scanservjs.yaml
+  when: print_server_scanservjs

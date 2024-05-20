@@ -1,0 +1,9 @@
+const options = { paths: ['/usr/lib/scanservjs'] };
+const Process = require(require.resolve('./server/classes/process', options));
+const dayjs = require(require.resolve('dayjs', options));
+
+module.exports = {
+    afterConfig(config) {
+        config.host = '0.0.0.0';
+    }
+}

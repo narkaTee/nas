@@ -1,0 +1,4 @@
+- name: Restart scanservjs
+  ansible.builtin.service:
+    name: scanservjs
+    state: restarted
