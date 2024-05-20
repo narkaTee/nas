@@ -2,6 +2,7 @@
 auto_upgrades_additional_origins_pattern:
   # the 1password repo has some strange meta data
   - o=. stable,a=stable
+  - o=${distro_id} Backports,n=${distro_codename}-backports
 
 nftables_nat_rules:
   - iifname priv-net masquerade
