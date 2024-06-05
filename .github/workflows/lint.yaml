@@ -18,7 +18,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies.
-        run: pip3 install yamllint ansible-core ansible-lint
+        run: pip3 install yamllint ansible-core ansible-lint jmespath
 
       - name: Install ansible collections
         run: ansible-galaxy install -r requirements.yaml
