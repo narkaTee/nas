@@ -1,9 +1,17 @@
 {% extends "backup-base.j2" %}
 {% block content%}
-op run -- duplicity \
+out=$(op run -- duplicity \
 {% if ob_key_id is defined %}  --encrypt-sign-key "{{ob_key_id}}" \
 {% endif %}
   --full-if-older-than 1M \
   "{{item.src}}" \
-  "{{ob_backend_base_url}}/{{ansible_facts.fqdn}}{{item.src}}"
+  "{{ob_backend_base_url}}/{{ansible_facts.fqdn}}{{item.src}}")
+
+backup_code=$?
+
+if [ $backup_code -gt 0 ]; then
+  echo "Problem backing up: {{ item.src }}"
+  echo
+  echo "$out"
+fi
 {% endblock %}
