@@ -14,4 +14,19 @@ if [ $backup_code -gt 0 ]; then
   echo
   echo "$out"
 fi
+
+out=$(op run -- duplicity \
+{% if ob_key_id is defined %}  --encrypt-sign-key "{{ob_key_id}}" \
+{% endif %}
+  remove-older-than 1M \
+  --force \
+  "{{ob_backend_base_url}}/{{ansible_facts.fqdn}}{{item.src}}")
+
+cleanup_code=$?
+
+if [ $cleanup_code -gt 0 ]; then
+  echo "Problem cleaning up: {{ item.src }}"
+  echo
+  echo "$out"
+fi
 {% endblock %}
