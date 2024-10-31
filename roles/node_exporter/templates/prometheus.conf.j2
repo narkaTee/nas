@@ -1,0 +1,4 @@
+ARGS="
+{%- if node_exporter_listen_address is defined -%}
+--web.listen-address={{ node_exporter_listen_address }} {% endif -%}
+--collector.systemd --collector.processes"
