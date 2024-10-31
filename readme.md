@@ -2,6 +2,16 @@
 
 # ZFS
 
+## ZED
+
+sends notifications for relevant zfs events.
+Per default it only sends mails to root when a pool in not healthy.
+
+To test the functionality edit `/etc/zfs/zed.d/zed.rc` and enable
+verbose `ZED_NOTIFY_VERBOSE=1` and to a scrub `zpool scrub <pool>`.
+
+You should receive a mail about the successful scrub.
+
 ## kernel modules/dkms and Secure Boot
 
 To load kernel modules with secure boot enabled the Machine Owner
