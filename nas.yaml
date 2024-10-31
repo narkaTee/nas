@@ -16,14 +16,16 @@
     - role: node_exporter
     - role: debian_backports
       vars:
+        # contrib is require for zfs
         debian_backports_archives: main contrib
 
   handlers:
 
   tasks:
-    - name: Install zfs
+    - name: Install ZFS
       ansible.builtin.package:
         name:
           - linux-headers-amd64
           - zfsutils-linux
           - zfs-dkms
+      tags: ['zfs']
