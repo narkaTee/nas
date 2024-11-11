@@ -1,4 +1,6 @@
 ARGS="
 {%- if node_exporter_listen_address is defined -%}
 --web.listen-address={{ node_exporter_listen_address }} {% endif -%}
+{%- if node_exporter_textfile_collector_dir is defined -%}
+--collector.textfile --collector.textfile.directory='{{ node_exporter_textfile_collector_dir }}' {% endif -%}
 --collector.systemd --collector.processes"

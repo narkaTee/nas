@@ -2,6 +2,14 @@
   ansible.builtin.package:
     name: prometheus-node-exporter
 
+- name: Create textfile collector
+  ansible.builtin.file:
+    path: "{{ node_exporter_textfile_collector_dir }}"
+    state: "directory"
+    mode: "0775"
+    owner: prometheus
+    group: prometheus
+
 - name: Configure node exporter
   ansible.builtin.template:
     dest: /etc/prometheus.conf
