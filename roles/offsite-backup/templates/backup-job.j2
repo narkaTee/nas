@@ -1,5 +1,6 @@
 {% extends "backup-base.j2" %}
 {% block content%}
+job="{{ item.name | default(item.src) | replace('/', '-') | trim('-') }}"
 out=$(op run -- duplicity \
 {% if ob_key_id is defined %}  --encrypt-sign-key "{{ob_key_id}}" \
 {% endif %}
@@ -8,6 +9,10 @@ out=$(op run -- duplicity \
   "{{ob_backend_base_url}}/{{ansible_facts.fqdn}}{{item.src}}")
 
 backup_code=$?
+
+if hash duplicity_prometheus.py 2> /dev/null && [ -d "/var/lib/node_exporter" ]; then
+  echo "$out" | duplicity_prometheus.py --source "{{item.src}}" | sponge "/var/lib/node_exporter/duplicity_$job.prom"
+fi
 
 if [ $backup_code -gt 0 ]; then
   echo "Problem backing up: {{ item.src }}"

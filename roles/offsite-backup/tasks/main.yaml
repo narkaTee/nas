@@ -32,6 +32,14 @@
     group: root
     mode: "0700"
 
+- name: Install output to prometheus metric converter
+  ansible.builtin.copy:
+    dest: /usr/local/bin/duplicity_prometheus.py
+    src: templates/duplicity_prometheus.py
+    owner: root
+    group: root
+    mode: "0700"
+
 - name: Install restore helper completion
   ansible.builtin.copy:
     dest: /etc/bash_completion.d/duplicityw
