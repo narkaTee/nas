@@ -70,6 +70,9 @@ nh_containers:
   - name: grafana
     os: debian
     bridge: priv-net
+  - name: fritz-exporter
+    os: debian
+    bridge: priv-net
 
 container_proxy_routes:
   - path: /grafana

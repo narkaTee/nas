@@ -208,3 +208,8 @@ Useful dashboards:
 
 - https://grafana.com/grafana/dashboards/10664-smart-disk-data/ (removing the extended labels from the queries 👌)
 - https://grafana.com/grafana/dashboards/3992-smartmon/ just raw data
+
+# Fritz!Exporter
+
+- https://github.com/pdreker/fritz_exporter
+- https://grafana.com/grafana/dashboards/13983-fritz-exporter/

@@ -1,0 +1,35 @@
+[Unit]
+After=network.target
+
+[Service]
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+# we store the config and the pythong venv there
+#ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=strict
+RemoveIPC=true
+RestrictAddressFamilies=AF_INET
+RestrictAddressFamilies=AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+# This gets run when the service starts up
+ExecStart=/home/fritz_exporter/python-venv/bin/fritzexporter --config /home/fritz_exporter/fritz_exporter.yaml
+User=fritz_exporter
+Group=fritz_exporter
+WorkingDirectory=/tmp
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

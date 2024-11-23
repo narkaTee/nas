@@ -1,0 +1,15 @@
+static_ip:
+  ifname: host0
+  ipv4:
+    address: 192.168.1.20/24
+    gateway: 192.168.1.1
+
+fritz_exporter_devices:
+  - name: Fritz!Box
+    hostname: fritz.box
+    username: "{{ lookup('community.general.onepassword', 'fritzexporter user', vault='nas', field='username') }}"
+    password: "{{ lookup('community.general.onepassword', 'fritzexporter user', vault='nas', field='password') }}"
+  - name: Repeater Wohnzimmer
+    hostname: fritz.repeater
+    username: "{{ lookup('community.general.onepassword', 'fritz repeater user', vault='nas', field='username') }}"
+    password: "{{ lookup('community.general.onepassword', 'fritz repeater user', vault='nas', field='password') }}"

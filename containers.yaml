@@ -3,6 +3,7 @@
   hosts:
     - grafana
     - pihole
+    - fritz-exporter
   roles:
     - static-ip
 
@@ -26,3 +27,8 @@
     - prometheus.prometheus.prometheus
     - prometheus.prometheus.alertmanager
     - grafana.grafana.grafana
+
+- name: Setup fritz_exporter container
+  hosts: fritz-exporter
+  roles:
+    - fritz_exporter

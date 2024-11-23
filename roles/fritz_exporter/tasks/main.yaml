@@ -1,0 +1,67 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - python3-setuptools
+      - python3-pip
+      - python3-venv
+      - sudo
+      # required to use become_user to impersonate a non root user
+      - acl
+  tags: ['fritz_exporter']
+
+- name: Create fritz_exporter group
+  ansible.builtin.group:
+    name: fritz_exporter
+    state: present
+  tags: ['fritz_exporter']
+
+- name: Create fritz_exporter user
+  ansible.builtin.user:
+    name: fritz_exporter
+    group: fritz_exporter
+    create_home: true
+    shell: /usr/sbin/nologin
+    system: true
+  tags: ['fritz_exporter']
+
+- name: Configure fritz_exporter settings
+  ansible.builtin.template:
+    dest: /home/fritz_exporter/fritz_exporter.yaml
+    src: templates/fritz_exporter.yaml.j2
+    owner: fritz_exporter
+    group: fritz_exporter
+    mode: "0600"
+  notify:
+    - Restart fritz_exporter
+  tags: ['fritz_exporter']
+
+- name: Setup python venv
+  ansible.builtin.command:
+    cmd: python3 -m venv /home/fritz_exporter/python-venv/
+    creates: /home/fritz_exporter/python-venv/
+  become: true
+  become_user: fritz_exporter
+  tags: ['fritz_exporter']
+
+- name: Install fritz-exporter python package
+  ansible.builtin.command:
+    cmd: /home/fritz_exporter/python-venv/bin/pip install fritz-exporter
+  become: true
+  become_user: fritz_exporter
+  tags: ['fritz_exporter']
+
+- name: Configure fritz exporter service
+  ansible.builtin.template:
+    dest: /etc/systemd/system/fritz_exporter.service
+    src: templates/fritz_exporter.service.j2
+  notify:
+    - Reload systemd
+    - Restart fritz_exporter
+  tags: ['fritz_exporter']
+
+- name: Start fritz exporter
+  ansible.builtin.service:
+    name: fritz_exporter
+    state: started
+    enabled: true
+  tags: ['fritz_exporter']
