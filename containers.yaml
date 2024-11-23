@@ -25,6 +25,7 @@
   hosts: grafana
   roles:
     - prometheus.prometheus.prometheus
+    - prometheus.prometheus.blackbox_exporter
     - prometheus.prometheus.alertmanager
     - grafana.grafana.grafana
 
