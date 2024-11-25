@@ -12,6 +12,11 @@ static_ip:
 
 prometheus_web_external_url: /prometheus
 prometheus_scrape_configs:
+  - job_name: 'prometheus-monitoring'
+    metrics_path: /prometheus/metrics
+    static_configs:
+      - targets:
+          - localhost:9090
   - job_name: 'blackbox'
     metrics_path: /probe
     params:
