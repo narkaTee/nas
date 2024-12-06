@@ -214,3 +214,4 @@ Useful dashboards:
 
 - https://github.com/pdreker/fritz_exporter
 - https://grafana.com/grafana/dashboards/13983-fritz-exporter/
+- https://grafana.com/grafana/dashboards/17751-fritz-exporter-dash/
