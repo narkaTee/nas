@@ -10,6 +10,16 @@ static_ip:
     address: 192.168.1.10/24
     gateway: 192.168.1.1
 
+# the container setup does currently not suport ipv6 I should add this someday 🙃
+blackbox_exporter_configuration_modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_status_codes: []
+      preferred_ip_protocol: "ip4"
+
 prometheus_web_external_url: /prometheus
 prometheus_scrape_configs:
   - job_name: 'prometheus-monitoring'
@@ -17,13 +27,19 @@ prometheus_scrape_configs:
     static_configs:
       - targets:
           - localhost:9090
-  - job_name: 'blackbox'
+  - job_name: 'blackbox http'
     metrics_path: /probe
     params:
       module: [http_2xx]  # Look for a HTTP 200 response.
     static_configs:
       - targets:
           - http://fritz.repeater
+          - http://10.143.174.34/
+          - https://heise.de/impressum.html
+          - https://duckduckgo.com
+          - https://teams.microsoft.com
+          - http://www.msftconnecttest.com/connecttest.txt
+          - https://www.microsoft.com
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

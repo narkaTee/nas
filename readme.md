@@ -193,6 +193,7 @@ rules!
 - https://grafana.com/tutorials/run-grafana-behind-a-proxy/
 - https://github.com/prometheus-community/ansible
 - https://github.com/prometheus-community/ansible/tree/main/roles/prometheus
+- https://github.com/prometheus-community/ansible/tree/main/roles/blackbox_exporter
 - https://github.com/prometheus-community/ansible/tree/main/roles/alertmanager
 
 ## Node Exporter
