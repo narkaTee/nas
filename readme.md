@@ -48,6 +48,22 @@ See also: https://stackoverflow.com/questions/39226185/kernel-module-mokutil-fai
 
 `ansible-galaxy install -r requirements.yaml`
 
+# file server
+
+samba with guest/anon access enabled.
+
+## Connection with windows
+
+Windows 11 24H2 comes with new default settings for smb shares.
+Authentication without credentials is disabled by default, to enable it
+again:
+
+- Edit Group Policy
+- Computer Configuration -> Windows Settings -> Security Settings -> Local Policy -> Security Options -> Micropsoft network client: Digitally sign communications (always): Disabled
+- Computer Configuration -> Administrative Templates -> Network -> Lanman Workstation -> Enable insecure guest logons: Enabled
+
+In the future authenticated shares might be an option.
+
 # offsite backup
 
 The default is to use symmetric encryption. To use asymmetric encryption
