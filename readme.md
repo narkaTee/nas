@@ -1,5 +1,9 @@
 # nas config
 
+# install ansible collections
+
+`ansible-galaxy install -r requirements.yaml`
+
 # crucial ssd firmware update
 
 updates on linux a kind of a hassle. The download is a iso which boots
@@ -69,10 +73,6 @@ options will do. On my old asus board "no" is the options to append a
 key from a disk.
 
 See also: https://stackoverflow.com/questions/39226185/kernel-module-mokutil-failed-to-enroll-new-keys
-
-# install dependencies
-
-`ansible-galaxy install -r requirements.yaml`
 
 # file server
 
