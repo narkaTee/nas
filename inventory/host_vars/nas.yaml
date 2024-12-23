@@ -7,6 +7,21 @@ auto_upgrades_additional_origins_pattern:
 nftables_nat_rules:
   - iifname priv-net masquerade
 
+zfs_pools:
+  - name: ssd-pool1
+    members: >-
+      mirror
+      /dev/disk/by-id/wwn-0x500a0751e5de6bfa
+      /dev/disk/by-id/wwn-0x500a0751e9887e7b
+zfs_volumes:
+  - name: ssd-pool1/ssd
+    extra_zfs_properties:
+      compression: 'lz4'
+      acltype: 'posix'
+  - name: ssd-pool1/backup
+    extra_zfs_properties:
+      compression: 'lz4'
+      acltype: 'posix'
 
 bridge_bridges:
   - ifname: priv-net
@@ -22,7 +37,7 @@ exim4_mail_relay_nets:
   - 192.168.1.1/24
 
 dlna_server_directories:
-  - path: /nas/ssd/share/MP3/Alben/
+  - path: /ssd-pool1/ssd/share/MP3/Alben/
     type: A
 
 fs_hosts_allow: 10.143.174.0/24
@@ -30,15 +45,15 @@ fs_workgroup: LAN
 fs_shares:
   - name: nas-ssd
     public: true
-    path: /nas/ssd/share
+    path: /ssd-pool1/ssd/share
   - name: backup
     public: true
-    path: /backup/share
+    path: /ssd-pool1/backup/share
 
 pipxe_interface: eth0
 # dnsmasq dhcp range that will be proxies to the other dhcp server
 pipxe_dhcp_range: 10.143.174.255
-pipxe_base_dir: /pipxe
+pipxe_base_dir: /ssd-pool1/ssd/pipxe
 pipxe_bootstrap_img: .cache/pi.img
 pipxe_hosts:
   - name: retropi
@@ -52,15 +67,16 @@ ob_before_backup: |
   source ~/.config/env.local.sh
 ob_passphrase: op://nas/nas-backup-passphrase/passphrase
 ob_locations:
-  - src: /pipxe/
-  - src: /backup/
+  - src: /ssd-pool1/ssd/pipxe/
+  - src: /ssd-pool1/backup/
   - name: ssd-share
-    src: /nas/ssd/share
+    src: /ssd-pool1/ssd/share
   - name: container-pihole-config
     src: /var/lib/machines/pihole/etc/pihole
   - name: container-grafana-config
     src: /var/lib/machines/grafana/var/lib/grafana/
 
+nas_bind_mount_machines_folder: /ssd-pool1/ssd/systemd-machines
 nh_containers:
   - name: pihole
     os: debian

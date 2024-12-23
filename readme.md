@@ -1,6 +1,32 @@
 # nas config
 
+# crucial ssd firmware update
+
+updates on linux a kind of a hassle. The download is a iso which boots
+a linux system that runs the cli command... 🙄
+
+from: https://medium.com/@vdboor/upgrading-crucial-firmware-on-linux-76056254539
+
+1. [download firmware](https://www.crucial.com/support/ssd-support)
+2. this:
+```shell
+mkdir firmware-upgrade && cd firmware-upgrade
+mount -o loop WHATEVER.zip /mnt/
+gzip -dc /mnt/boot/corepure64.gz | cpio -idm
+# the last command probably outputs a few errors
+
+./sbin/msecli -U -v -i ./opt/firmware/ -n /dev/sdX
+```
+
 # ZFS
+
+Available properties: https://manpages.debian.org/bookworm/zfsutils-linux/zfsprops.7.en.html
+
+
+Migration woes:
+
+* `acltype` needs to be set to posix, otherweise migration of the pipxe
+  filesystems fail because unsupported acls.
 
 ## ZED
 

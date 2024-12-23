@@ -29,3 +29,45 @@
           - zfsutils-linux
           - zfs-dkms
       tags: ['zfs']
+
+    - name: Create ZFS pools
+      ansible.builtin.command:
+        cmd: zpool create {{ item.name }} {{ item.members }} -f
+        creates: /{{ item.name }}
+      loop: "{{ zfs_pools }}"
+      when: zfs_pools is defined
+      tags: ['zfs']
+
+    - name: Create ZFS volumes
+      community.general.zfs:
+        name: "{{ item.name }}"
+        state: present
+        extra_zfs_properties: "{{ item.extra_zfs_properties }}"
+      loop: "{{ zfs_volumes }}"
+      when: zfs_volumes is defined
+      tags: ['zfs']
+
+    - name: Make sure machines bind mount target directory exists
+      ansible.builtin.file:
+        dest: "{{ nas_bind_mount_machines_folder }}"
+        owner: root
+        group: root
+        mode: "0700"
+        state: directory
+      when: nas_bind_mount_machines_folder is defined
+      tags: ['nspawn']
+
+    - name: Bind mount machines directory
+      ansible.posix.mount:
+        path: /var/lib/machines
+        src: "{{ nas_bind_mount_machines_folder }}"
+        # we need to tell systemdd that this mount requires the zfs mount service.
+        # There is a way to let zfs generate information about the volumes and pools so that systemd can figure
+        # it out by itself. I was unable to find an easy to understand piece of documentation 🙃
+        # Keywords: zfs-mount-generator filesystem mount ordering
+        # So for now this is good enough!
+        opts: bind,x-systemd.required-by=machines.target,x-systemd.requires=zfs-mount.service
+        fstype: none
+        state: mounted
+      when: nas_bind_mount_machines_folder is defined
+      tags: ['nspawn']

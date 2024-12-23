@@ -7,12 +7,14 @@
           stable "/var/lib/machines/{{ container.name }}"
       args:
         creates: /var/lib/machines/{{ container.name }}
+      tags: ['nspawn']
 
   rescue:
     - name: "Delete container folder afer failure {{ container.name }}"
       ansible.builtin.file:
         dest: /var/lib/machines/{{ container.name }}
         state: absent
+      tags: ['nspawn']
 
 - name: "Create nspawn file {{ container.name }}"
   ansible.builtin.template:
@@ -22,13 +24,16 @@
     src: ../templates/container.nspawn.j2
     dest: /etc/systemd/nspawn/{{ container.name }}.nspawn
   register: config
+  tags: ['nspawn']
 
 - name: "Container should autostart and be started {{ container.name }}"
   ansible.builtin.service:
     name: systemd-nspawn@{{ container.name }}
     enabled: true
     state: started
+  tags: ['nspawn']
 
 - name: "Reboot container after config change {{ container.name }}"
   ansible.builtin.command: machinectl reboot "{{ container.name }}"
   when: config.changed
+  tags: ['nspawn']
