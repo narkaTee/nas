@@ -23,7 +23,8 @@ jobs:
       - name: Install ansible collections
         run: ansible-galaxy install -r requirements.yaml
 
-      - name: Lint code.
-        run: |
-          yamllint .
-          ansible-lint
+      - name: Yamllint
+        run: yamllint .
+
+      - name: Ansible lint
+        run: ansible-lint
