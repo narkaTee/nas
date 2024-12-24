@@ -1,0 +1,21 @@
+name: test
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Test duplicity_prometheus.py
+        run: ./roles/offsite-backup/templates/test_duplicity_prometheus.py
