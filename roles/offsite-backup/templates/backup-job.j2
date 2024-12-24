@@ -10,8 +10,8 @@ out=$(op run -- duplicity \
 
 backup_code=$?
 
-if hash duplicity_prometheus.py 2> /dev/null && [ -d "/var/lib/node_exporter" ]; then
-  echo "$out" | duplicity_prometheus.py --source "{{item.src}}" | sponge "/var/lib/node_exporter/duplicity_$job.prom"
+if hash duplicity_prometheus.py 2> /dev/null && [ -d "/var/lib/prometheus/node-exporter" ]; then
+  echo "$out" | duplicity_prometheus.py --source "{{item.src}}" | sponge "/var/lib/prometheus/node-exporter/duplicity_$job.prom"
 fi
 
 if [ $backup_code -gt 0 ]; then

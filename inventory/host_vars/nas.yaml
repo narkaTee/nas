@@ -104,4 +104,5 @@ container_proxy_routes:
     type: pihole
 
 node_exporter_listen_address: 192.168.1.1:9100
-node_exporter_textfile_collector_dir: /var/lib/node_exporter
+# this is already the default config on debian
+# node_exporter_textfile_collector_dir: /var/lib/prometheus/node-exporter/
