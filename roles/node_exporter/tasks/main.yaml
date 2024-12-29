@@ -1,6 +1,7 @@
 - name: Install node exporter
   ansible.builtin.package:
     name: prometheus-node-exporter
+  tags: ["node_exporter"]
 
 - name: Create textfile collector directory
   ansible.builtin.file:
@@ -10,6 +11,7 @@
     owner: prometheus
     group: prometheus
   when: node_exporter_textfile_collector_dir is defined
+  tags: ["node_exporter"]
 
 - name: Configure node exporter
   ansible.builtin.template:
@@ -17,6 +19,7 @@
     src: templates/prometheus.conf.j2
   notify:
     - Restart node exporter
+  tags: ["node_exporter"]
 
 - name: Create override dir
   ansible.builtin.file:
@@ -25,6 +28,7 @@
     owner: root
     group: root
     mode: "0744"
+  tags: ["node_exporter"]
 
 - name: Settings override
   ansible.builtin.copy:
@@ -32,6 +36,8 @@
     content: |
       [Service]
       EnvironmentFile=/etc/prometheus.conf
+    mode: "0633"
+  tags: ["node_exporter"]
   notify:
     - Restart node exporter
 
@@ -41,3 +47,4 @@
   ansible.builtin.service:
     name: openipmi
     enabled: false
+  tags: ["node_exporter"]
