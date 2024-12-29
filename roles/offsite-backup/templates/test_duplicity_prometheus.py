@@ -2,25 +2,27 @@
 import unittest
 import duplicity_prometheus
 
-class TestConvertToProm(unittest.TestCase):
-    example_output = '''--------------[ Backup Statistics ]--------------
-StartTime 1731323219.32 (Mon Nov 11 12:06:59 2024)
-EndTime 1731323258.46 (Mon Nov 11 12:07:38 2024)
-ElapsedTime 39.14 (39.14 seconds)
-SourceFiles 371880
-SourceFileSize 40480464592 (37.7 GB)
-NewFiles 123
-NewFileSize 8 (1 bytes)
-DeletedFiles 0
-ChangedFiles 0
-ChangedFileSize 0 (0 bytes)
-ChangedDeltaSize 0 (0 bytes)
-DeltaEntries 0
-RawDeltaSize 0 (0 bytes)
-TotalDestinationSizeChange 111 (111 bytes)
-Errors 1337
--------------------------------------------------
-'''
+class TestDuplicityPrometheus(unittest.TestCase):
+
+    def setUp(self):
+        duplicity_prometheus.stats = {
+            "lastBackup":           0,
+            "elapseTime":           0.0,
+            "errors":               0,
+            "files": {
+                "source":           0,
+                "new":              0,
+                "deleted":          0,
+                "changed":          0,
+                "delta":            0,
+            },
+            "size": {
+                "rawDelta":         0,
+                "changedFiles":     0,
+                "sourceFile":       0,
+                "totalDestChange":  0,
+            }
+        }
 
     def test_format_metric_line_returns_source_and_value(self):
         result = duplicity_prometheus.format_metric_line('test', {"source": '/test'}, 123)
@@ -34,34 +36,38 @@ Errors 1337
         result = duplicity_prometheus.format_metric_line('test', {"source": '/test'}, 123, None, 'text')
         self.assertEqual(result, '# TYPE duplicity_test text\nduplicity_test{source="/test"} 123\n', "Should match")
 
-    def test_process_duplicity_log_line_detects_start_of_stats(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        self.assertEqual(duplicity_prometheus.reached_stats, True, 'Should detect the start of the stats output')
+    def test_process_duplicity_log_line_parses_complete_output(self):
+        log_lines = [
+            "--------------[ Backup Statistics ]--------------",
+            "StartTime 1633036800",
+            "ElapsedTime 123.45",
+            "Errors 2",
+            "SourceFiles 100",
+            "NewFiles 10",
+            "DeletedFiles 5",
+            "ChangedFiles 20",
+            "DeltaEntries 15",
+            "RawDeltaSize 1024",
+            "ChangedFileSize 2048",
+            "SourceFileSize 4096",
+            "TotalDestinationSizeChange 8192"
+        ]
 
-    def test_process_duplicity_log_line_detects_lastBackup(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[1])
-        self.assertEqual(duplicity_prometheus.stats["lastBackup"], 1731323219, 'Should detect lastBackup (StartTime) of the stats output')
+        for line in log_lines:
+            duplicity_prometheus.process_duplicity_log_line(line)
 
-    def test_process_duplicity_log_line_detects_elaspeTime(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[3])
-        self.assertEqual(duplicity_prometheus.stats["elapseTime"], 39.14, 'Should detect elaspseTime (ElaspedTime) of the stats output')
-
-    def test_process_duplicity_log_line_detects_errors(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[15])
-        self.assertEqual(duplicity_prometheus.stats["errors"], 1337, 'Should detect elaspseTime (ElaspedTime) of the stats output')
-
-    def test_process_duplicity_log_line_detects_files_source(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[4])
-        self.assertEqual(duplicity_prometheus.stats["files"]["source"], 371880, 'Should detect files.source (SourceFiles) of the stats output')
-
-    def test_process_duplicity_log_line_detects_files_new(self):
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[0])
-        duplicity_prometheus.process_duplicity_log_line(self.example_output.splitlines()[6])
-        self.assertEqual(duplicity_prometheus.stats["files"]["new"], 123, 'Should detect files.new (NewFiles) of the stats output')
+        self.assertEqual(duplicity_prometheus.stats["lastBackup"], 1633036800)
+        self.assertEqual(duplicity_prometheus.stats["elapseTime"], 123.45)
+        self.assertEqual(duplicity_prometheus.stats["errors"], 2)
+        self.assertEqual(duplicity_prometheus.stats["files"]["source"], 100)
+        self.assertEqual(duplicity_prometheus.stats["files"]["new"], 10)
+        self.assertEqual(duplicity_prometheus.stats["files"]["deleted"], 5)
+        self.assertEqual(duplicity_prometheus.stats["files"]["changed"], 20)
+        self.assertEqual(duplicity_prometheus.stats["files"]["delta"], 15)
+        self.assertEqual(duplicity_prometheus.stats["size"]["rawDelta"], 1024)
+        self.assertEqual(duplicity_prometheus.stats["size"]["changedFiles"], 2048)
+        self.assertEqual(duplicity_prometheus.stats["size"]["sourceFile"], 4096)
+        self.assertEqual(duplicity_prometheus.stats["size"]["totalDestChange"], 8192)
 
 if __name__ == '__main__':
     unittest.main()
