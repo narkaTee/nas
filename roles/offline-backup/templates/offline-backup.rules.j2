@@ -1,0 +1,8 @@
+{% for device in offline_backup_devices %}
+ACTION=="add", \
+SUBSYSTEM=="block", \
+ENV{ID_BUS}=="usb", \
+ENV{ID_FS_UUID}=="{{ device.uuid }}", \
+TAG+="systemd", \
+ENV{SYSTEMD_WANTS}="offline-backup@$env{ID_FS_UUID}.service"
+{% endfor %}

@@ -10,6 +10,7 @@
     - role: dlna-server
     - role: file-server
     - role: pi-pxe-boot
+    - role: offline-backup
     - role: offsite-backup
     - role: nspawn-host
     - role: container-proxy

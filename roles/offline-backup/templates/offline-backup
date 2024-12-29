@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+set -e
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+
+if [ -f "/etc/default/offline-backup" ]; then
+    . /etc/default/offline-backup
+fi
+
+if [ -z "$SOURCE_DIRS" ]; then
+    echo "SOURCE_DIRS is not set" >&2
+    exit 1
+fi
+
+backup_reminder_days="30"
+
+command="$1"
+shift
+
+try_to_update_last_backup() {
+    [ ! -f /mnt/offline-backup/last-backup.json ] && echo '{}' > /mnt/offline-backup/last-backup.json
+
+    if ! update_last_backup "$1"; then
+        echo "last-backup.json update failed, file corrupted recreating it"
+        echo '{}' > /mnt/offline-backup/last-backup.json
+        update_last_backup "$1" || echo "Could not update last-backup.json" && exit 1
+    fi
+    mv /mnt/offline-backup/last-backup.tmp.json /mnt/offline-backup/last-backup.json
+}
+
+update_last_backup() {
+    jq --arg uuid "$1" --arg date "$(date +"%s")" \
+        '.[$uuid] = { "last-backup": $date }' \
+        /mnt/offline-backup/last-backup.json > /mnt/offline-backup/last-backup.tmp.json
+}
+
+case "$command" in
+    check-for-last-backup)
+        latest_backup=0
+        for device_uuid in "${DEVICE_IDS[@]}"; do
+            last_backup_for_device="$(jq -r --arg uuid "$device_uuid" \
+                '.[$uuid]."last-backup"' \
+                /mnt/offline-backup/last-backup.json 2> /dev/null || true)"
+            if [ -n "$last_backup_for_device" ]; then
+                last_backup_human_readable=$(date -d @"$last_backup_for_device" +"%Y-%m-%d %H:%M:%S")
+                echo "Last backup for device $device_uuid: $last_backup_for_device ($last_backup_human_readable)"
+                if (( latest_backup < last_backup_for_device)); then
+                    latest_backup="$last_backup_for_device"
+                fi
+            else
+                echo "No backup found for device $device_uuid"
+            fi
+        done
+
+        current_ts=$(date +%s)
+        difference=$(( (current_ts - latest_backup) / 86400 ))
+        if [ "$difference" -gt "$backup_reminder_days" ]; then
+            echo "Last offline backup is more than $backup_reminder_days days ago"
+        mail -s "Offline backup: backup reminder" root <<EOF
+        The last backup ($latest_backup: $(date -d @"$latest_backup" +"%Y-%m-%d %H:%M:%S")) is more then $backup_reminder_days days old.
+EOF
+        fi
+        ;;
+    run)
+        # soo the systemd udev can get bit wonky as explained here: https://github.com/systemd/systemd/issues/16735#issuecomment-2563982916
+        # For now the setup I have works as long as I don't use %I in the unit file.
+        # If the device id starts looking strange due to escaping issues I will have to work something out.
+        device_uuid="$1"
+        if [ -z "$device_uuid" ]; then
+            echo "Device UUID is required" >&2
+            exit 1
+        fi
+        device_mountpoint="/mnt/offline-backup/$device_uuid"
+        echo "Starting backup for device $device_uuid, mounting to $device_mountpoint"
+
+        mount -o defaults,noexec,nosuid,nodev UUID="$device_uuid" "$device_mountpoint" || exit 1
+        # We want $device_uuid to exapnd right now, and during an error it might take a few seconds for the device to be no longer busy
+        # shellcheck disable=SC2064
+        trap "sleep 5 && umount /mnt/offline-backup/$device_uuid; exit 1" ERR
+
+        DEST_DIR="/mnt/offline-backup/${device_uuid}"
+        DATE=$(date +"%Y-%m-%d-%H-%M")
+        BACKUP_DIR="${DEST_DIR}/${DATE}"
+        RSYNC_OPTS="-av --delete --mkpath"
+
+        for SOURCE_DIR in "${SOURCE_DIRS[@]}";
+        do
+            LATEST_BACKUP=$(find "${DEST_DIR}" -mindepth 1 -maxdepth 1 -type d ! -name 'lost+found' -printf '%T@ %p\n' 2>/dev/null | sort -n -r | head -1 | cut -d' ' -f2-)
+            if [ -d "${LATEST_BACKUP}" ]; then
+                echo "Incremental backup"
+                printf "\tfrom %s\n" "${SOURCE_DIR}"
+                printf "\tto %s\n" "${BACKUP_DIR}"
+                printf "\tusing %s as incremental base\n" "${LATEST_BACKUP}"
+                # shellcheck disable=SC2086
+                echo rsync $RSYNC_OPTS --link-dest="${LATEST_BACKUP}${SOURCE_DIR}" "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
+                # shellcheck disable=SC2086
+                rsync $RSYNC_OPTS --link-dest="${LATEST_BACKUP}${SOURCE_DIR}" "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
+            else
+                echo "Full backup"
+                printf "\tfrom %s\n" "${SOURCE_DIR}"
+                printf "\tto %s\n" "${BACKUP_DIR}"
+                # shellcheck disable=SC2086
+                echo rsync $RSYNC_OPTS "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
+                # shellcheck disable=SC2086
+                rsync $RSYNC_OPTS "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
+            fi
+        done
+        umount "/mnt/offline-backup/$device_uuid"
+
+        echo "Backup completed successfully to ${BACKUP_DIR}"
+        try_to_update_last_backup "$device_uuid"
+        mail -s "Offline backup: completed" root <<EOF
+        - journalctl -u "offline-backup@$device_uuid"
+        - systemctl status --full "offline-backup@$device_uuid"
+
+        Output:
+        $(systemctl status --full "offline-backup@$device_uuid")
+EOF
+    ;;
+esac

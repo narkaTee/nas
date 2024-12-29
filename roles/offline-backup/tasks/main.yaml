@@ -1,0 +1,74 @@
+---
+- name: Make sure jq is installed
+  ansible.builtin.package:
+    name:
+      - jq
+  tags: ["offline-backup"]
+
+- name: Ensure /mnt/offline-backup directory exists
+  ansible.builtin.file:
+    path: /mnt/offline-backup
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags: ["offline-backup"]
+
+- name: Ensure /mnt/offline-backup device directories exist
+  ansible.builtin.file:
+    path: /mnt/offline-backup/{{ item.uuid }}
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  with_items: "{{ offline_backup_devices }}"
+  tags: ["offline-backup"]
+
+- name: Create /etc/default/offline-backup config
+  ansible.builtin.template:
+    src: offline-backup-config.j2
+    dest: /etc/default/offline-backup
+    owner: root
+    group: root
+    mode: '0644'
+  tags: ["offline-backup"]
+
+- name: Install offline-backup script
+  ansible.builtin.copy:
+    src: templates/offline-backup
+    dest: /usr/local/bin/offline-backup
+    owner: root
+    group: root
+    mode: '0744'
+  tags: ["offline-backup"]
+
+- name: Install offline-backup systemd service template
+  ansible.builtin.template:
+    src: offline-backup@.service.j2
+    dest: /etc/systemd/system/offline-backup@.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd for offline-backup
+  tags: ["offline-backup"]
+
+- name: Install udev rule that triggers the service template
+  ansible.builtin.template:
+    src: offline-backup.rules.j2
+    dest: /etc/udev/rules.d/90-offline-backup-drives.rules
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload udev rules for offline-backup
+  tags: ["offline-backup"]
+
+- name: Install backup reminder cron
+  ansible.builtin.copy:
+    dest: /etc/cron.daily/offline-backup-reminder
+    content: |
+      #!/usr/bin/env bash
+      /usr/bin/chronic /usr/local/bin/offline-backup check-for-last-backup
+    owner: root
+    group: root
+    mode: '0744'
+  tags: ["offline-backup"]

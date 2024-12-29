@@ -1,0 +1,2 @@
+SOURCE_DIRS=({{offline_backup_paths | map('ansible.builtin.quote') | join(' ') }})
+DEVICE_IDS=({{offline_backup_devices | map(attribute = 'uuid') | map('ansible.builtin.quote') | join(' ') }})

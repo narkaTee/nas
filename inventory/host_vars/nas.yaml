@@ -62,6 +62,13 @@ pipxe_hosts:
     mac: b8:27:eb:95:ec:6e
     serial: 6e95ec6e
 
+offline_backup_paths:
+  - /ssd-pool1/ssd/share/
+  - /ssd-pool1/backup/
+offline_backup_devices:
+  - uuid: b3e45358-6df5-49bd-a0e7-6ad89be08d37
+    name: seagate-4tb
+
 ob_backend_base_url: "{{ lookup('community.general.onepassword', 'offsitebackup', vault='nas', field='base-url') }}"
 ob_before_backup: |
   source ~/.config/env.local.sh

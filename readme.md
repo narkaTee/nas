@@ -90,6 +90,36 @@ again:
 
 In the future authenticated shares might be an option.
 
+# offline backup
+
+Automatically backup to a USB drive when it is connected and send an email notification when backup is complete.
+
+I could to fancy stuff with zfs pools and `zfs send` to build a really efficient backup, but according to "some dudes on the internet"™️ (for example on this [reddit post](https://www.reddit.com/r/zfs/comments/xt2176/zfs_on_usb_external_hdds_good_or_bad_idea/)) that could get flaky when the pool is not unmounted correcly.
+Also this is backup is best kept very simple, I want to be able to mount this on basically on any machine and be able to extract files.
+
+## Device setup
+
+Just take whaterver usb device you have lying around, format it with the **linux** filesystem of your choice and get the filesystem uuid with `blkid`.
+The backup makes use of hard links to build a incremental backup with rsync. So the filesystem has to support that.
+
+For the detection to properly work the filesystem uuid needs to show up in udev, to double check use `udevadm info --name=/dev/<device>` and look for the `ID_FS_UUID` device property.
+Formatting the device itself works flawless 👌🙂
+
+## Concept
+
+I am using a udev rule to trigger a systemd tamplate unit that runs the backup script.
+The udev rule are built to only trigger a run when a usb disk with a known fs uuid is connected.
+That triggers the start of a systemd one shot unit that runs the bash backup script.
+
+- https://manpages.debian.org/bookworm/udev/udev.7.en.html
+- https://manpages.debian.org/bookworm/systemd/systemd.unit.5.en.html (search for template)
+
+The error handling is very basic, the systemd unit enters a failed state if the backup fails and the montoring will catch that and notify me.
+This could be improved by sending a email with the unit output. I could use the OnFailure setting that trigger another systemd unit like in this example [here](https://wiki.archlinux.org/title/Systemd/Timers#MAILTO).
+But for now this is food enough.
+
+The backup drives are not encrypted, the drives are not going to be carried around a lot so there is no risk of accidential loss.
+
 # offsite backup
 
 The default is to use symmetric encryption. To use asymmetric encryption
