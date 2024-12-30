@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+backup_dir="$1"
+
+[ -z "$backup_dir" ] && echo "Usage: $0 <backup_dir>" >&2 && exit 1
+
+for dir in "$backup_dir"*/; do
+    if [ ! -d "$dir/.git" ]; then
+        continue
+    fi
+
+    echo "Updating $dir"
+    cd "$dir" && git pull --rebase -q || echo "Failed to pull $dir" >&2
+done

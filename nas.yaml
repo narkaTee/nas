@@ -72,3 +72,23 @@
         state: mounted
       when: nas_bind_mount_machines_folder is defined
       tags: ['nspawn']
+
+    - name: Install git-backup util
+      ansible.builtin.copy:
+        src: utils/git-backup
+        dest: /usr/local/bin/git-backup
+        owner: root
+        group: root
+        mode: '0755'
+      tags: ['git-backup']
+
+    - name: Create daily git-backup cron
+      ansible.builtin.copy:
+        dest: /etc/cron.daily/git-backup
+        content: |
+          #!/bin/bash
+          /usr/bin/chronic -ve /usr/local/bin/git-backup "/ssd-pool1/backup/git-repos/"
+        owner: root
+        group: root
+        mode: '0744'
+      tags: ['git-backup']
