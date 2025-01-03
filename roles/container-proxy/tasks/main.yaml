@@ -2,12 +2,14 @@
 - name: Install dependencies
   ansible.builtin.package:
     name: nginx
+  tags: ['container_proxy']
 
 - name: Disable default site
   ansible.builtin.file:
     dest: /etc/nginx/sites-enabled/default
     state: absent
   notify: Restart nginx
+  tags: ['container_proxy']
 
 - name: Configure proxy site
   ansible.builtin.template:
@@ -17,6 +19,7 @@
     group: root
     mode: "0644"
   notify: Restart nginx
+  tags: ['container_proxy']
 
 - name: Install index file
   ansible.builtin.template:
@@ -25,6 +28,27 @@
     owner: root
     group: root
     mode: "0644"
+  tags: ['container_proxy']
+
+- name: Ensure icons directory exists
+  ansible.builtin.file:
+    path: /var/www/html/icons/
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: ['container_proxy']
+
+- name: Download icons for proxy routes
+  ansible.builtin.get_url:
+    url: "{{ item.icon }}"
+    dest: "/var/www/html/icons/{{ item.icon | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ container_proxy_routes }}"
+  when: item.icon is defined
+  tags: ['container_proxy']
 
 - name: Enable proxy site
   ansible.builtin.file:
@@ -32,3 +56,4 @@
     src: /etc/nginx/sites-available/container-proxy
     state: link
   notify: Restart nginx
+  tags: ['container_proxy']

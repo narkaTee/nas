@@ -98,17 +98,25 @@ nh_containers:
     bridge: priv-net
 
 container_proxy_routes:
-  - path: /grafana
+  - title: Grafana
+    path: /grafana
     backend: http://192.168.1.10:3000/
     type: grafana
-  - path: /prometheus
+    icon: https://upload.wikimedia.org/wikipedia/commons/a/a1/Grafana_logo.svg
+  - title: Prometheus
+    path: /prometheus
     # no trailing / otherwise redirect loop
     backend: http://192.168.1.10:9090
-  - path: /alertmanager
+    icon: https://upload.wikimedia.org/wikipedia/commons/3/38/Prometheus_software_logo.svg
+  - title: Alertmanager
+    path: /alertmanager
     backend: http://192.168.1.10:9093
-  - path: /pihole/
+    icon: https://upload.wikimedia.org/wikipedia/commons/3/38/Prometheus_software_logo.svg
+  - title: Pi-hole
+    path: /pihole/
     backend: http://192.168.1.5/admin/
     type: pihole
+    icon: https://upload.wikimedia.org/wikipedia/en/1/15/Pi-hole_vector_logo.svg
 
 node_exporter_listen_address: 192.168.1.1:9100
 # this is already the default config on debian
