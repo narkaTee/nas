@@ -97,6 +97,22 @@ nh_containers:
     os: debian
     bridge: priv-net
 
+cloudflare_dns_records:
+  - zone: "{{ public_dns_zone_name }}"
+    record: nas
+    type: A
+    value: "{{ ansible_facts['default_ipv4']['address'] }}"
+
+certbot_dns_cloudflare_api_token: "{{ cloudflare_dns_api_token }}"
+certbot_dns_email: "{{ lookup('community.general.onepassword', 'letsencrypt email', vault='nas', field='email') }}"
+certbot_dns_certs:
+  - domains:
+      - nas.{{ public_dns_zone_name }}
+
+container_proxy_ssl: true
+container_proxy_ssl_host: "nas.{{ public_dns_zone_name }}"
+container_proxy_ssl_cert: "/etc/letsencrypt/live/{{ container_proxy_ssl_host | replace('*.', '') }}/fullchain.pem"
+container_proxy_ssl_key: "/etc/letsencrypt/live/{{ container_proxy_ssl_host | replace('*.', '') }}/privkey.pem"
 container_proxy_routes:
   - title: Grafana
     path: /grafana

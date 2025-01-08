@@ -1,0 +1,9 @@
+- name: "Create a DNS record"
+  community.general.cloudflare_dns:
+    zone: "{{ item.zone }}"
+    record: "{{ item.record }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    api_token: "{{ cloudflare_dns_api_token }}"
+  with_items: "{{ cloudflare_dns_records | default([]) }}"
+  tags: cloudflare_dns

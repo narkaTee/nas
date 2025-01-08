@@ -1,0 +1,2 @@
+certbot_dns_cloudflare_credentials: /etc/letsencrypt/cloudflare.ini
+certbot_dns_test: false

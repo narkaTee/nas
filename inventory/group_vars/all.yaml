@@ -1,0 +1,10 @@
+cloudflare_dns_api_token: >-
+  {{ lookup('community.general.onepassword',
+            'cloudflare: Edit DNS zone Api Token',
+            vault='nas',
+            field='password') }}
+public_dns_zone_name: >-
+  {{ lookup('community.general.onepassword',
+            'cloudflare: Edit DNS zone Api Token',
+            vault='nas',
+            field='zone') }}

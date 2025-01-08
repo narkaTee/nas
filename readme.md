@@ -4,6 +4,26 @@
 
 `ansible-galaxy install -r requirements.yaml`
 
+# lets encrypt
+
+Uses dns validation in certbot to get valid tls certs.
+
+- [dns-plugin-list](https://eff-certbot.readthedocs.io/en/latest/using.html#dns-plugins)
+- [certbot-dns-cloudflare docs](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)
+- [community maintained list of options](https://community.letsencrypt.org/t/dns-providers-who-easily-integrate-with-lets-encrypt-dns-validation/86438)
+- [cheapest tlds?](https://www.worthyblog.com/cloudflare-domain-pricing-complete-list/)
+
+The setup the certs two roles are used:
+- `cloudflare_dns` to register DNS records for hosts
+- `certbot_dns` to requests certs via lets encrypt
+
+The certs are stored in the standard lets encrypt location: `/etc/letsencrypt/live`
+Server configuration needs to be done seperately.
+
+Cloudflare api tokens can be restricted to only allow access to one dns zone.
+
+Remember to configure exceptions for dns rebind protection on your router!
+
 # crucial ssd firmware update
 
 updates on linux a kind of a hassle. The download is a iso which boots

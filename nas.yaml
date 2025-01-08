@@ -13,6 +13,8 @@
     - role: offline-backup
     - role: offsite-backup
     - role: nspawn-host
+    - role: cloudflare_dns
+    - role: certbot_dns
     - role: container-proxy
     - role: node_exporter
     - role: debian_backports

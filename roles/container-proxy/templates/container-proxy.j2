@@ -20,7 +20,14 @@ map $upstream_http_location $replace_location_{{ route.path.replace('/', '') }} 
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
-	server_name _;
+{% if container_proxy_ssl | default(false) %}
+    listen 443 ssl;
+    ssl_certificate {{ container_proxy_ssl_cert }};
+    ssl_certificate_key {{ container_proxy_ssl_key }};
+    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+{% endif %}
+	server_name _ {{ container_proxy_ssl_host | default("") }};
 
 	root /var/www/html/;
 	index index.html;

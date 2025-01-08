@@ -1,0 +1,30 @@
+# streamlined role for debian only
+# the role https://github.com/geerlingguy/ansible-role-certbot
+# does not include dns validation and also creates a additional cronjob that is not needed on debian
+# there is already a timer that renews the cert
+
+- name: Install certbot and cloudflare plugin
+  ansible.builtin.package:
+    name:
+      - certbot
+      - python3-certbot-dns-cloudflare
+      - python3-certbot-nginx
+  tags: ['certbot_dns']
+
+- name: Ensure cloudflare credentials are present
+  community.general.ini_file:
+    path: "{{ certbot_dns_cloudflare_credentials }}"
+    option: dns_cloudflare_api_token
+    value: "{{ certbot_dns_cloudflare_api_token }}"
+    mode: '0600'
+  tags: ['certbot_dns']
+
+- name: Create certificate
+  include_tasks:
+    file: cert.yaml
+    apply:
+      tags: ['certbot_dns']
+  with_items: "{{ certbot_dns_certs }}"
+  loop_control:
+    loop_var: cert_item
+  tags: ['certbot_dns']
