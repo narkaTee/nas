@@ -1,7 +1,10 @@
 *.swp
+.idea/
 .vscode/
 .cache/*
 !.cache/.keep
 
 __pycache__/
 ansible_collections/
+
+roles/paperless_ngx/
