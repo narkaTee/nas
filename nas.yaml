@@ -25,6 +25,15 @@
   handlers:
 
   tasks:
+    - name: Configure zfs package pinning
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/90zfs
+        content: |
+          Package: src:zfs-linux
+          Pin: release n=bookworm-backports
+          Pin-Priority: 990
+      tags: ['zfs']
+
     - name: Install ZFS
       ansible.builtin.package:
         name:
