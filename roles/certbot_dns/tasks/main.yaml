@@ -28,3 +28,17 @@
   loop_control:
     loop_var: cert_item
   tags: ['certbot_dns']
+
+- name: Create post renewal hook
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/post/certbot_dns_post_hooks
+    content: |
+      #!/usr/bin/env bash
+      {% for hook in certbot_dns_post_hooks %}
+      {{ hook }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0750"
+  when:
+    - certbot_dns_post_hooks is defined

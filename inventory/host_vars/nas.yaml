@@ -108,6 +108,8 @@ certbot_dns_email: "{{ lookup('community.general.onepassword', 'letsencrypt emai
 certbot_dns_certs:
   - domains:
       - nas.{{ public_dns_zone_name }}
+certbot_dns_post_hooks:
+  - "systemctl reload nginx"
 
 container_proxy_ssl: true
 container_proxy_ssl_host: "nas.{{ public_dns_zone_name }}"
