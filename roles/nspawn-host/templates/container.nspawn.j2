@@ -1,6 +1,9 @@
 [Exec]
 PrivateUsers=pick
 ResolvConf=bind-host
+{% if container.capabilities is defined %}
+Capability={{ container.capabilities | join(' ') }}
+{% endif %}
 
 [Network]
 VirtualEthernet=yes
