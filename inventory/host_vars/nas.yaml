@@ -131,7 +131,7 @@ container_proxy_routes:
     backend: http://192.168.1.10:9093
     icon: https://upload.wikimedia.org/wikipedia/commons/3/38/Prometheus_software_logo.svg
   - title: Pi-hole
-    path: /pihole/
+    path: /pihole/admin
     backend: http://192.168.1.5/admin/
     type: pihole
     icon: https://upload.wikimedia.org/wikipedia/en/1/15/Pi-hole_vector_logo.svg

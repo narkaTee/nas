@@ -17,20 +17,26 @@
     mode: "0775"
     state: directory
 
-- name: Create pihole setupvars
-  ansible.builtin.template:
-    src: ./templates/setupVars.conf.j2
-    dest: /etc/pihole/setupVars.conf
-  register: pihole_setupvars
-
 - name: Install pi-hole
   ansible.builtin.command: "'/etc/.pihole/automated install/basic-install.sh' --unattended"
   args:
     creates: /opt/pihole
   register: pihole_install
 
-- name: Reconfigure pi-hole after setupvars change
-  ansible.builtin.command: "'/etc/.pihole/automated install/basic-install.sh' --reconfigure --unattended"
-  when:
-    - not pihole_install.changed
-    - pihole_setupvars.changed
+- name: Set Pi-hole configuration settings
+  ansible.builtin.command:
+    cmd: "pihole-FTL --config {{ item.key }} '{{ item.value }}'"
+  with_items:
+    - { key: "dns.upstreams", value: "{{ [pihole_dns_1, pihole_dns_2, pihole_dns_3, pihole_dns_4]
+        | select('defined')
+        | select('string')
+        | to_json
+        }}"
+    }
+    - { key: "webserver.paths.prefix", value: "/pihole" }
+  register: pihole_config
+
+- name: Set Pi-hole Web password
+  ansible.builtin.command:
+    cmd: "pihole-FTL --config webserver.api.password '{{ pihole_web_password }}'"
+  no_log: true
