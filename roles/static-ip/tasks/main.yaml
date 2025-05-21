@@ -7,10 +7,13 @@
     group: root
     mode: "0633"
   register: interface_file
+  tags: static_ip
 
 - name: Shutdown {{ static_ip.ifname }}
   ansible.builtin.command: ifdown {{ static_ip.ifname }}
   when: interface_file.changed
+  tags: static_ip
 
 - name: Make sure interface is up {{ static_ip.ifname }}
   ansible.builtin.command: ifup {{ static_ip.ifname }}
+  tags: static_ip

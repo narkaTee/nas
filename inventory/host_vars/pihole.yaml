@@ -5,6 +5,9 @@ static_ip:
   ipv4:
     address: 192.168.1.5/24
     gateway: 192.168.1.1
+  ipv6:
+    address: fd00::5/64
+    gateway: fd00::1
 
 pihole_web_password: "{{ lookup('community.general.onepassword', 'pihole', vault='nas', field='password') }}"
 pihole_dns_1: "10.143.174.1"

@@ -3,24 +3,27 @@
 - name: Install depenencies
   ansible.builtin.package:
     name: bridge-utils
+  tags: bridge
 
 - name: Setup interface.d include
   ansible.builtin.lineinfile:
     path: /etc/network/interfaces
     line: source /etc/network/interfaces.d/*
+  tags: bridge
 
 - name: Enable routing
-  ansible.builtin.copy:
+  ansible.builtin.template:
+    src: templates/sysctl-ip-forwarding.conf.j2
     dest: /etc/sysctl.d/50-ip-forwarding.conf
     owner: root
     group: root
     mode: "0644"
-    content: |
-      net.ipv4.ip_forward = 1
   notify: Reload sysctl
+  tags: bridge
 
 - name: Create bridges
   ansible.builtin.include_tasks: "bridge.yaml"
   loop: "{{ bridge_bridges }}"
   loop_control:
     loop_var: bridge
+  tags: bridge

@@ -4,6 +4,7 @@
     name:
       - dnsmasq
     state: present
+  tags: bridge
 
 - name: Bridge config {{ bridge.ifname }}
   ansible.builtin.template:
@@ -14,3 +15,4 @@
     mode: "0622"
   notify:
     - Restart dnsmasq
+  tags: bridge

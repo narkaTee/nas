@@ -11,7 +11,24 @@ table nat {
 	chain postrouting {
 		type nat hook postrouting priority 100;
 
-{% for rule in nftables_nat_rules | default([]) %}
+{% for rule in nftables_nat_rules.postrouting | default([]) %}
+		{{ rule }}
+{% endfor %}
+	}
+}
+
+table ip6 nat {
+	chain prerouting {
+		type nat hook prerouting priority 100;
+
+{% for rule in nftables_nat_ip6_rules.prerouting | default([]) %}
+		{{ rule }}
+{% endfor %}
+	}
+	chain postrouting {
+		type nat hook postrouting priority 100;
+
+{% for rule in nftables_nat_ip6_rules.postrouting | default([]) %}
 		{{ rule }}
 {% endfor %}
 	}

@@ -3,6 +3,8 @@
   ansible.builtin.service:
     name: dnsmasq
     state: restarted
+  tags: bridge
 
 - name: Reload sysctl
   ansible.builtin.command: sysctl --system
+  tags: bridge

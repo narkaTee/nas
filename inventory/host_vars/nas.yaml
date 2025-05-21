@@ -5,7 +5,13 @@ auto_upgrades_additional_origins_pattern:
   - o=${distro_id} Backports,n=${distro_codename}-backports
 
 nftables_nat_rules:
-  - iifname priv-net masquerade
+  postrouting:
+    - iifname priv-net masquerade
+nftables_nat_ip6_rules:
+  postrouting:
+    - iifname priv-net masquerade
+  prerouting:
+    - udp dport 53 dnat to fd00::5:53
 
 zfs_pools:
   - name: ssd-pool1
@@ -30,6 +36,8 @@ bridge_bridges:
       range_end: 192.168.1.254
     ipv4:
       address: 192.168.1.1/24
+    ipv6:
+      address: fd00::1/64
 
 exim4_mail_relay_additional_interfaces:
   - 192.168.1.1

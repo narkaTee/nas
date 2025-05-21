@@ -6,15 +6,30 @@
     group: root
     mode: "0644"
   register: bridge_config
+  tags: bridge
+
+- name: Disable DAD
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/55-disable-dad-{{ bridge.ifname }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      net.ipv6.conf.{{ bridge.ifname }}.accept_dad = 0
+  notify: Reload sysctl
+  tags: bridge
 
 - name: Shutdown interface
   ansible.builtin.command: ifdown {{ bridge.ifname }}
   when: bridge_config.changed
+  tags: bridge
 
 - name: Start interface
   ansible.builtin.command: ifup {{ bridge.ifname }}
   when: bridge_config.changed
+  tags: bridge
 
 - name: Setup DHCP
   ansible.builtin.import_tasks: dhcp.yaml
   when: bridge.dhcp
+  tags: bridge

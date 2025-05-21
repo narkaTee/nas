@@ -2,3 +2,8 @@ auto {{ bridge.ifname }}
 iface {{ bridge.ifname }} inet static
     bridge_ports none
     address {{ bridge.ipv4.address }}
+
+{% if bridge.ipv6 is defined %}
+iface {{ bridge.ifname }} inet6 static
+	address {{ bridge.ipv6.address }}
+{% endif %}

@@ -3,6 +3,7 @@
   ansible.builtin.service:
     name: nftables
     enabled: true
+  tags: nftables
 
 - name: Create nfstables config file
   ansible.builtin.template:
@@ -13,6 +14,7 @@
     mode: "0633"
     validate: nft -cf %s
   notify: Reload nftables
+  tags: nftables
 
 - name: Create directories
   ansible.builtin.file:
@@ -21,6 +23,7 @@
     group: root
     mode: "0733"
     state: directory
+  tags: nftables
   loop:
     - /etc/nftables.d
     - /etc/nftables.d/tables
@@ -34,3 +37,4 @@
     mode: "0733"
     validate: nft -cf %s
   notify: Reload nftables
+  tags: nftables
