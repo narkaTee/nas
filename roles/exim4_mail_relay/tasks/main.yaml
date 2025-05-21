@@ -1,6 +1,7 @@
 - name: Install dependencies
   ansible.builtin.package:
     name: exim4
+  tags: exim4_mail_relay
 
 - name: Configure update-exim4.conf
   ansible.builtin.template:
@@ -9,6 +10,7 @@
     owner: root
     group: root
     mode: "0644"
+  tags: exim4_mail_relay
   notify:
     - Regenrate config
     - Restart exim4
@@ -18,6 +20,7 @@
     dest: /etc/mailname
     content: |
       {{ exim4_mail_relay_mailname }}
+  tags: exim4_mail_relay
 
 - name: Configure credentials
   ansible.builtin.template:
@@ -26,6 +29,7 @@
     owner: root
     group: Debian-exim
     mode: "0640"
+  tags: exim4_mail_relay
   when: exim4_mail_relay_passwd is defined
 
 - name: Service is started and enabled
@@ -33,6 +37,7 @@
     name: exim4
     enabled: true
     state: started
+  tags: exim4_mail_relay
 
 - name: Configure aliases
   ansible.builtin.lineinfile:
@@ -40,4 +45,5 @@
     regexp: '^{{ item.name }}:'
     line: "{{ item.name }}: {{ item.alias }}"
   loop: "{{ exim4_mail_relay_aliases }}"
+  tags: exim4_mail_relay
   when: exim4_mail_relay_aliases is defined

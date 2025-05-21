@@ -2,8 +2,9 @@ mail_settings:
   username: "{{ lookup('community.general.onepassword', 'nas-mail-account', vault='nas', field='username') }}"
   password: "{{ lookup('community.general.onepassword', 'nas-mail-account', vault='nas') }}"
   smarthost: "{{ lookup('community.general.onepassword', 'nas-mail-account', vault='nas', field='smarthost') }}"
+  readhost: "{{ lookup('community.general.onepassword', 'nas-mail-account', vault='nas', field='readhost') }}"
 exim4_mail_relay_mailname: "{{ ansible_fqdn }}"
-exim4_mail_relay_readhost: "{{ 1 | extract(mail_settings.username | split('@')) }}"
+exim4_mail_relay_readhost: "{{ mail_settings.readhost }}"
 exim4_mail_relay_smarthost: "{{ mail_settings.smarthost }}"
 exim4_mail_relay_passwd:
   - host: "{{ 0 | extract(mail_settings.smarthost | split(':')) }}"
