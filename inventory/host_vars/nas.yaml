@@ -110,6 +110,10 @@ cloudflare_dns_records:
     record: nas
     type: A
     value: "{{ ansible_facts['default_ipv4']['address'] }}"
+  - zone: "{{ public_dns_zone_name }}"
+    record: nas-kvm
+    type: A
+    value: "10.143.174.89"
 
 certbot_dns_cloudflare_api_token: "{{ cloudflare_dns_api_token }}"
 certbot_dns_email: "{{ lookup('community.general.onepassword', 'letsencrypt email', vault='nas', field='email') }}"

@@ -67,6 +67,7 @@ prometheus_targets:
     - targets:
         - 192.168.1.1:9100
         - pi01:9100
+        - nas-kvm
 
 prometheus_alert_rules_files:
   - "inventory/grafana/prometheus/rules/*.rules"
