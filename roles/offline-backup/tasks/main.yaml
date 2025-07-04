@@ -1,8 +1,9 @@
 ---
-- name: Make sure jq is installed
+- name: Make sure jq and rdiff-backup are installed
   ansible.builtin.package:
     name:
       - jq
+      - rdiff-backup
   tags: ["offline-backup"]
 
 - name: Ensure /mnt/offline-backup directory exists

@@ -82,37 +82,40 @@ EOF
         trap "sleep 5 && umount /mnt/offline-backup/$device_uuid; exit 1" ERR
 
         DEST_DIR="/mnt/offline-backup/${device_uuid}"
-        DATE=$(date +"%Y-%m-%d-%H-%M")
-        BACKUP_DIR="${DEST_DIR}/${DATE}"
-        RSYNC_OPTS="-av --delete --mkpath"
+        BACKUP_DIR="${DEST_DIR}/"
 
         for SOURCE_DIR in "${SOURCE_DIRS[@]}";
         do
-            LATEST_BACKUP=$(find "${DEST_DIR}" -mindepth 1 -maxdepth 1 -type d ! -name 'lost+found' -printf '%T@ %p\n' 2>/dev/null | sort -n -r | head -1 | cut -d' ' -f2-)
-            if [ -d "${LATEST_BACKUP}" ]; then
-                echo "Incremental backup"
-                printf "\tfrom %s\n" "${SOURCE_DIR}"
-                printf "\tto %s\n" "${BACKUP_DIR}"
-                printf "\tusing %s as incremental base\n" "${LATEST_BACKUP}"
-                # shellcheck disable=SC2086
-                echo rsync $RSYNC_OPTS --link-dest="${LATEST_BACKUP}${SOURCE_DIR}" "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
-                # shellcheck disable=SC2086
-                rsync $RSYNC_OPTS --link-dest="${LATEST_BACKUP}${SOURCE_DIR}" "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
-            else
-                echo "Full backup"
-                printf "\tfrom %s\n" "${SOURCE_DIR}"
-                printf "\tto %s\n" "${BACKUP_DIR}"
-                # shellcheck disable=SC2086
-                echo rsync $RSYNC_OPTS "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
-                # shellcheck disable=SC2086
-                rsync $RSYNC_OPTS "${SOURCE_DIR}" "${BACKUP_DIR}${SOURCE_DIR}"
-            fi
+            echo "rdiff backup"
+            printf "\tfrom %s\n" "${SOURCE_DIR}"
+            printf "\tto %s\n" "${BACKUP_DIR}${SOURCE_DIR}"
+
+            rdiff-backup backup \
+                --create-full-path \
+                --preserve-numerical-ids \
+                --exclude-device-files \
+                --exclude-fifos \
+                --exclude-sockets \
+                "$SOURCE_DIR" "$BACKUP_DIR$SOURCE_DIR"
         done
+        usage=$(df --output=pcent "$device_mountpoint" | tail -n1 | tr -dc '0-9')
+        if [ "$usage" -gt 60 ]; then
+            echo "**********************************************************"
+            echo "Warning: Device $device_uuid is over 60% disk space utilization ($usage%)"
+            echo "**********************************************************"
+
+            mail -s "Offline backup: disk usage warning!" root <<EOF
+    Device $device_uuid at $device_mountpoint is over 60% disk space utilization ($usage%).
+EOF
+        fi
+
         umount "/mnt/offline-backup/$device_uuid"
 
         echo "Backup completed successfully to ${BACKUP_DIR}"
         try_to_update_last_backup "$device_uuid"
         mail -s "Offline backup: completed" root <<EOF
+        Disk usage after backup: $usage%
+
         - journalctl -u "offline-backup@$device_uuid"
         - systemctl status --full "offline-backup@$device_uuid"
 
