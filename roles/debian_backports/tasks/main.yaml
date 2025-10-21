@@ -1,4 +1,4 @@
-- name: Install backports repo
+- name: Install backports repo (deb format for Debian < 13)
   ansible.builtin.copy:
     dest: /etc/apt/sources.list.d/backports.list
     owner: root
@@ -7,10 +7,44 @@
     content: |
       deb http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports {{ debian_backports_archives }}
       deb-src http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports {{ debian_backports_archives }}
-  when: debian_backports_enabled
+  tags: debian_backports
+  when:
+    - debian_backports_enabled
+    - ansible_facts['distribution'] == 'Debian'
+    - (ansible_facts['distribution_major_version'] | int) < 13
+
+- name: Install backports repo (deb822 .sources format for Debian >= 13)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/backports.sources
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Types: deb deb-src
+      URIs: http://deb.debian.org/debian
+      Suites: {{ ansible_facts.lsb.codename }}-backports
+      Components: {{ debian_backports_archives }}
+      Enabled: yes
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+  tags: debian_backports
+  when:
+    - debian_backports_enabled
+    - ansible_facts['distribution'] == 'Debian'
+    - (ansible_facts['distribution_major_version'] | int) >= 13
+
+- name: Determine expected backports file path
+  set_fact:
+    debian_backports_file: "/etc/apt/sources.list.d/backports.sources"
+  when: (ansible_facts['distribution_major_version'] | int) >= 13
+
+- name: Determine expected backports file path for Debian < 13
+  set_fact:
+    debian_backports_file: "/etc/apt/sources.list.d/backports.list"
+  when: (ansible_facts['distribution_major_version'] | int) < 13
 
 - name: Remove backports repo
   ansible.builtin.file:
-    dest: /etc/apt/sources.list.d/backports.list
+    dest: "{{ debian_backports_file }}"
     state: absent
+  tags: debian_backports
   when: not debian_backports_enabled

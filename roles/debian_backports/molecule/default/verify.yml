@@ -1,0 +1,73 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Determine expected backports file path for Debian >= 13
+      set_fact:
+        expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
+      when: (ansible_facts['distribution_major_version'] | int) >= 13
+
+    - name: Determine expected backports file path for Debian < 13
+      set_fact:
+        expected_backports_file: "/etc/apt/sources.list.d/backports.list"
+      when: (ansible_facts['distribution_major_version'] | int) < 13
+
+    - name: Get backport file stats
+      ansible.builtin.stat:
+        path: "{{ expected_backports_file }}"
+      register: backports_stat
+
+    - name: Fail if backports file is missing
+      ansible.builtin.assert:
+        that:
+          - backports_stat.stat.exists
+        fail_msg: "Backports file {{ expected_backports_file }} not found"
+
+    - name: Read backports file
+      ansible.builtin.slurp:
+        src: "{{ expected_backports_file }}"
+      register: backports_file
+
+    - name: Set expected backports content
+      set_fact:
+        expected_backports_content: |
+          {% if (ansible_facts['distribution_major_version'] | int) >= 13 %}
+          Types: deb deb-src
+          URIs: http://deb.debian.org/debian
+          Suites: {{ ansible_facts.lsb.codename }}-backports
+          Components: main contrib
+          Enabled: yes
+          Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+          {% else %}
+          deb http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports main contrib
+          deb-src http://deb.debian.org/debian {{ ansible_facts.lsb.codename }}-backports main contrib
+          {% endif %}
+
+    - name: Write expected backports content to temp file
+      ansible.builtin.copy:
+        content: "{{ expected_backports_content.rstrip() + '\n' }}"
+        dest: "/tmp/expected_backports_{{ inventory_hostname }}.tmp"
+        mode: '0644'
+
+    - name: Diff expected vs actual backports file
+      ansible.builtin.command:
+        argv:
+          - diff
+          - -u
+          - --label
+          - expected
+          - --label
+          - actual
+          - /tmp/expected_backports_{{ inventory_hostname }}.tmp
+          - "{{ expected_backports_file }}"
+      register: backports_diff
+      failed_when: false
+      changed_when: false
+
+    - name: Fail if backports file content differs (show unified diff)
+      ansible.builtin.fail:
+        msg: |
+          Backports file {{ expected_backports_file }} content does not match expected:
+          {{ backports_diff.stdout }}
+      when: backports_diff.rc != 0

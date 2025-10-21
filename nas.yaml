@@ -30,7 +30,7 @@
         dest: /etc/apt/preferences.d/90zfs
         content: |
           Package: src:zfs-linux
-          Pin: release n=bookworm-backports
+          Pin: release n={{ ansible_facts.lsb.codename }}-backports
           Pin-Priority: 990
       tags: ['zfs']
 

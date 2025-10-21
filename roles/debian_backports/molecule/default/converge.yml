@@ -1,0 +1,10 @@
+---
+- name: Run role
+  hosts: all
+  any_errors_fatal: true
+  vars:
+    debian_backports_archives: main contrib
+  tasks:
+    - name: "Include debian_backports role"
+      ansible.builtin.include_role:
+        name: "../../../debian_backports"
