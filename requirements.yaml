@@ -2,6 +2,6 @@
 collections:
   - name: ansible.posix
   - name: community.general
-    version: 8.5.0
+    version: ">=8.5.0"
   - name: grafana.grafana
   - name: prometheus.prometheus
