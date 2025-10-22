@@ -31,5 +31,5 @@
 
 - name: Setup DHCP
   ansible.builtin.import_tasks: dhcp.yaml
-  when: bridge.dhcp
+  when: bridge.dhcp | bool
   tags: bridge
