@@ -1,0 +1,40 @@
+---
+# Verify the nftables configuration
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert nftables service is enabled
+      ansible.builtin.assert:
+        that:
+          - "'nftables.service' in ansible_facts.services"
+          - "ansible_facts.services['nftables.service'].status == 'enabled'"
+
+    - name: Get nftables ruleset
+      ansible.builtin.command: nft list ruleset
+      register: nft_ruleset
+      changed_when: false
+
+    - name: Assert nat tables exist
+      ansible.builtin.assert:
+        that:
+          - "'table ip nat' in nft_ruleset.stdout"
+          - "'table ip6 nat' in nft_ruleset.stdout"
+          - "'oifname \"eth0\" masquerade' in nft_ruleset.stdout"
+          - "'ip saddr 192.168.2.0/24 snat to 192.168.1.100' in nft_ruleset.stdout"
+          - "'ip6 daddr 2001:db8::1 dnat to 2001:db8::100' in nft_ruleset.stdout"
+
+    - name: Check config file permissions
+      ansible.builtin.stat:
+        path: /etc/nftables.conf
+      register: nft_conf
+
+    - name: Assert config file permissions
+      ansible.builtin.assert:
+        that:
+          - "nft_conf.stat.mode == '0633'"
+          - "nft_conf.stat.pw_name == 'root'"
+          - "nft_conf.stat.gr_name == 'root'"

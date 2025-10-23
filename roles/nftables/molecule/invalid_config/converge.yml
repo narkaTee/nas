@@ -1,0 +1,40 @@
+---
+# Test playbook for nftables role with invalid configuration
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Install nftables
+      ansible.builtin.package:
+        name: nftables
+        state: present
+
+    - name: Invalid nftables config test block
+      block:
+        - name: Include nftables role with invalid configuration (local path)
+          ansible.builtin.include_role:
+            name: "../../../nftables"
+          vars:
+            nftables_nat_rules:
+              postrouting:
+                - masquerade oifname "nonexistent"
+                # Invalid syntax - missing 'to' keyword
+                - snat 192.168.1.100 ip saddr 192.168.2.0/24
+            nftables_nat_ip6_rules:
+              prerouting:
+                # Invalid IPv6 address format
+                - dnat ip6 to [invalid:ipv6::address] ip6 daddr [2001:db8::1]
+      rescue:
+        - name: Mark invalid_config_result as failed
+          ansible.builtin.set_fact:
+            invalid_config_result:
+              failed: true
+      always:
+        - name: Ensure invalid_config_result exists
+          ansible.builtin.set_fact:
+            invalid_config_result: "{{ invalid_config_result | default({'failed': false}) }}"
+
+    - name: Assert that the role failed due to invalid configuration
+      ansible.builtin.assert:
+        that:
+          - invalid_config_result.failed == true
+        fail_msg: "Role should have failed with invalid configuration"

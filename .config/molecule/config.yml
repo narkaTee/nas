@@ -4,9 +4,15 @@ driver:
 
 platforms:
   - name: debian13
-    image: docker.io/debian:13
+    image: docker.io/dokken/debian-13:latest
+    privileged: true
+    cgroup_parent: docker.slice
+    command: /lib/systemd/systemd
   - name: debian12
-    image: docker.io/debian:12
+    image: docker.io/dokken/debian-12:latest
+    privileged: true
+    cgroup_parent: docker.slice
+    command: /lib/systemd/systemd
 
 scenario:
   test_sequence:

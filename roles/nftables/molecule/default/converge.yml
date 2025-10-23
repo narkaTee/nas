@@ -1,0 +1,30 @@
+---
+# Test playbook for nftables role with valid configuration
+- name: Converge
+  hosts: all
+  any_errors_fatal: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Install nftables
+      ansible.builtin.package:
+        name: nftables
+        state: present
+
+    - name: Include nftables role (local path)
+      ansible.builtin.include_role:
+        name: "../../../nftables"
+      vars:
+        nftables_nat_rules:
+          postrouting:
+            - ip saddr 192.168.2.0/24 snat to 192.168.1.100
+            - oifname "eth0" masquerade
+        nftables_nat_ip6_rules:
+          prerouting:
+            - ip6 daddr 2001:db8::1 dnat to 2001:db8::100
+          postrouting:
+            - oifname "eth0" masquerade

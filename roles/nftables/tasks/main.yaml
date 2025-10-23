@@ -3,6 +3,7 @@
   ansible.builtin.service:
     name: nftables
     enabled: true
+    state: started
   tags: nftables
 
 - name: Create nfstables config file
