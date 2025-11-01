@@ -82,7 +82,7 @@
 <h1>Container Proxy Index</h1>
 <div class="cards-container">
     {% for route in container_proxy_routes %}
-        <a class="card" href="{{ route.path }}">
+        <a class="card" href="{{ route.href | default(route.path) }}">
             <h2>{{ route.title | default(route.path) }}</h2>
             {%  if route.icon is defined %}<img src="/icons/{{ route.icon | basename }}" alt="{{ route.title | default(route.path) }}" />{% endif %}
         </a>

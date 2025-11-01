@@ -34,9 +34,12 @@
         }}"
     }
     - { key: "webserver.paths.prefix", value: "/pihole" }
+    - { key: "dns.listeningMode", value: "ALL" }
   register: pihole_config
+  notify: Restart pihole-FTL
 
 - name: Set Pi-hole Web password
   ansible.builtin.command:
     cmd: "pihole-FTL --config webserver.api.password '{{ pihole_web_password }}'"
   no_log: true
+  notify: Restart pihole-FTL
