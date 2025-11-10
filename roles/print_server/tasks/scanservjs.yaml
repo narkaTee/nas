@@ -3,13 +3,17 @@
 
 - name: Set scanservjs version
   ansible.builtin.set_fact:
-    scanservjs_version: "{{ ansible_facts.packages | community.general.json_query('scanservjs[0].version') }}"
+    print_server_scanservjs_version: >-
+      {{
+        ansible_facts.packages
+        | community.general.json_query('scanservjs[0].version')
+      }}
 
 - name: Get scanservjs release
   ansible.builtin.uri:
     url: https://api.github.com/repos/sbs20/scanservjs/releases/tags/{{ print_server_scanservjs_version }}
     return_content: true
-  register: scanservjs_release_info
+  register: print_server_scanservjs_release_info
   check_mode: false
   when: print_server_scanservjs_version != 'latest'
 
@@ -17,42 +21,42 @@
   ansible.builtin.uri:
     url: https://api.github.com/repos/sbs20/scanservjs/releases/latest
     return_content: true
-  register: scanservjs_release_info
+  register: print_server_scanservjs_release_info
   check_mode: false
   when: print_server_scanservjs_version == 'latest'
 
 - name: Set desired version
   ansible.builtin.set_fact:
-    scanservjs_desired_version: >-
-      {{ scanservjs_release_info.content | from_json
+    print_server_scanservjs_desired_version: >-
+      {{ print_server_scanservjs_release_info.content | from_json
         | community.general.json_query('name') }}
 
 - name: Set scanservjs version
   ansible.builtin.set_fact:
-    scanservjs_needs_change: >-
-      {{ scanservjs_version is undefined or
-        'v' + scanservjs_version != scanservjs_desired_version }}
+    print_server_scanservjs_needs_change: >-
+      {{ print_server_scanservjs_version is undefined or
+        'v' + print_server_scanservjs_version != print_server_scanservjs_desired_version }}
 
 - name: Create temp directory for scanservjs
   ansible.builtin.tempfile:
     state: directory
     prefix: "print-server-scanservjs"
   register: print_server_scanservjs_temp
-  when: scanservjs_needs_change
+  when: print_server_scanservjs_needs_change
 
 - name: Download scanservjs package
   ansible.builtin.get_url:
     url: >-
-      {{ scanservjs_release_info.content | from_json |
+      {{ print_server_scanservjs_release_info.content | from_json |
         community.general.json_query('assets[?contains(name, `.deb`)].browser_download_url') | first }}
     dest: "{{ print_server_scanservjs_temp.path }}/scanservjs.deb"
   register: print_server_scanservjs_package
-  when: scanservjs_needs_change
+  when: print_server_scanservjs_needs_change
 
 - name: Install scanservjs
   ansible.builtin.apt:
     deb: "{{ print_server_scanservjs_temp.path }}/scanservjs.deb"
-  when: scanservjs_needs_change
+  when: print_server_scanservjs_needs_change
 
 - name: Configure scanservjs
   ansible.builtin.template:
