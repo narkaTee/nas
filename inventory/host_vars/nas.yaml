@@ -47,6 +47,8 @@ exim4_mail_relay_nets:
 dlna_server_directories:
   - path: /ssd-pool1/ssd/share/MP3/Alben/
     type: A
+  - path: /ssd-pool1/ssd/share/Videos
+    type: V
 
 fs_hosts_allow: 10.143.174.0/24
 fs_workgroup: LAN
