@@ -7,17 +7,17 @@
   tasks:
     - name: Determine expected backports file path for Debian >= 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
       when: (ansible_facts['distribution_major_version'] | int) >= 13
 
     - name: Determine expected backports file path for Debian < 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.list"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.list"
       when: (ansible_facts['distribution_major_version'] | int) < 13
 
     - name: Create dummy file to test removal
       ansible.builtin.copy:
-        dest: "{{ expected_backports_file }}"
+        dest: "{{ debian_backports_expected_backports_file }}"
         content: "# dummy file to be removed"
         mode: '0644'
 

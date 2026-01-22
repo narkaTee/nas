@@ -5,21 +5,21 @@
   tasks:
     - name: Determine expected backports file path for Debian >= 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
       when: (ansible_facts['distribution_major_version'] | int) >= 13
 
     - name: Determine expected backports file path for Debian < 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.list"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.list"
       when: (ansible_facts['distribution_major_version'] | int) < 13
 
     - name: Get backport file stats
       ansible.builtin.stat:
-        path: "{{ expected_backports_file }}"
-      register: backports_stat
+        path: "{{ debian_backports_expected_backports_file }}"
+      register: debian_backports_backports_stat
 
     - name: Fail if backports file is not missing
       ansible.builtin.assert:
         that:
-          - not backports_stat.stat.exists
-        fail_msg: "Backports file {{ expected_backports_file }} not found"
+          - not debian_backports_backports_stat.stat.exists
+        fail_msg: "Backports file {{ debian_backports_expected_backports_file }} not found"

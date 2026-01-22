@@ -24,17 +24,17 @@
                 # Invalid IPv6 address format
                 - dnat ip6 to [invalid:ipv6::address] ip6 daddr [2001:db8::1]
       rescue:
-        - name: Mark invalid_config_result as failed
+        - name: Mark nftables_invalid_config_result as failed
           ansible.builtin.set_fact:
-            invalid_config_result:
+            nftables_invalid_config_result:
               failed: true
       always:
-        - name: Ensure invalid_config_result exists
+        - name: Ensure nftables_invalid_config_result exists
           ansible.builtin.set_fact:
-            invalid_config_result: "{{ invalid_config_result | default({'failed': false}) }}"
+            nftables_invalid_config_result: "{{ nftables_invalid_config_result | default({'failed': false}) }}"
 
     - name: Assert that the role failed due to invalid configuration
       ansible.builtin.assert:
         that:
-          - invalid_config_result.failed == true
+          - nftables_invalid_config_result.failed == true
         fail_msg: "Role should have failed with invalid configuration"

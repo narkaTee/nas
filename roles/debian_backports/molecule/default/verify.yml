@@ -5,33 +5,33 @@
   tasks:
     - name: Determine expected backports file path for Debian >= 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.sources"
       when: (ansible_facts['distribution_major_version'] | int) >= 13
 
     - name: Determine expected backports file path for Debian < 13
       set_fact:
-        expected_backports_file: "/etc/apt/sources.list.d/backports.list"
+        debian_backports_expected_backports_file: "/etc/apt/sources.list.d/backports.list"
       when: (ansible_facts['distribution_major_version'] | int) < 13
 
     - name: Get backport file stats
       ansible.builtin.stat:
-        path: "{{ expected_backports_file }}"
-      register: backports_stat
+        path: "{{ debian_backports_expected_backports_file }}"
+      register: debian_backports_backports_stat
 
     - name: Fail if backports file is missing
       ansible.builtin.assert:
         that:
-          - backports_stat.stat.exists
-        fail_msg: "Backports file {{ expected_backports_file }} not found"
+          - debian_backports_backports_stat.stat.exists
+        fail_msg: "Backports file {{ debian_backports_expected_backports_file }} not found"
 
     - name: Read backports file
       ansible.builtin.slurp:
-        src: "{{ expected_backports_file }}"
-      register: backports_file
+        src: "{{ debian_backports_expected_backports_file }}"
+      register: debian_backports_backports_file
 
     - name: Set expected backports content
       set_fact:
-        expected_backports_content: |
+        debian_backports_expected_backports_content: |
           {% if (ansible_facts['distribution_major_version'] | int) >= 13 %}
           Types: deb deb-src
           URIs: http://deb.debian.org/debian
@@ -46,7 +46,7 @@
 
     - name: Write expected backports content to temp file
       ansible.builtin.copy:
-        content: "{{ expected_backports_content.rstrip() + '\n' }}"
+        content: "{{ debian_backports_expected_backports_content.rstrip() + '\n' }}"
         dest: "/tmp/expected_backports_{{ inventory_hostname }}.tmp"
         mode: '0644'
 
@@ -60,14 +60,14 @@
           - --label
           - actual
           - /tmp/expected_backports_{{ inventory_hostname }}.tmp
-          - "{{ expected_backports_file }}"
-      register: backports_diff
+          - "{{ debian_backports_expected_backports_file }}"
+      register: debian_backports_backports_diff
       failed_when: false
       changed_when: false
 
     - name: Fail if backports file content differs (show unified diff)
       ansible.builtin.fail:
         msg: |
-          Backports file {{ expected_backports_file }} content does not match expected:
-          {{ backports_diff.stdout }}
-      when: backports_diff.rc != 0
+          Backports file {{ debian_backports_expected_backports_file }} content does not match expected:
+          {{ debian_backports_backports_diff.stdout }}
+      when: debian_backports_backports_diff.rc != 0
