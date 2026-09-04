@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-ansible-playbook hosts.yaml -K $@
+uv run ansible-playbook hosts.yaml -K $@

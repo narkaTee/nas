@@ -18,3 +18,4 @@ rules:
 ignore: |
   ansible_collections/
   .cache/
+  .venv/

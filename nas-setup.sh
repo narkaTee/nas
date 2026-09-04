@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-ansible-playbook nas.yaml -K $@
+uv run ansible-playbook nas.yaml -K $@
