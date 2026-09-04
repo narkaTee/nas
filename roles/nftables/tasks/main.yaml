@@ -1,41 +1,41 @@
 ---
-- name: Enable nftables ruleset loading
-  ansible.builtin.service:
-    name: nftables
-    enabled: true
-    state: started
-  tags: nftables
-
-- name: Create nfstables config file
-  ansible.builtin.template:
-    dest: /etc/nftables.conf
-    src: nftables.conf.j2
-    owner: root
-    group: root
-    mode: "0633"
-    validate: nft -cf %s
-  notify: Reload nftables
-  tags: nftables
-
 - name: Create directories
   ansible.builtin.file:
     dest: "{{ item }}"
     owner: root
     group: root
-    mode: "0733"
+    mode: "0755"
     state: directory
   tags: nftables
   loop:
     - /etc/nftables.d
     - /etc/nftables.d/tables
 
-- name: Setup nat rules
+- name: Configure NAT rules
   ansible.builtin.template:
     dest: /etc/nftables.d/tables/nat.conf
     src: nat.conf.j2
     owner: root
     group: root
-    mode: "0733"
+    mode: "0644"
     validate: nft -cf %s
   notify: Reload nftables
+  tags: nftables
+
+- name: Create nftables config file
+  ansible.builtin.template:
+    dest: /etc/nftables.conf
+    src: nftables.conf.j2
+    owner: root
+    group: root
+    mode: "0644"
+    validate: nft -cf %s
+  notify: Reload nftables
+  tags: nftables
+
+- name: Enable nftables ruleset loading
+  ansible.builtin.service:
+    name: nftables
+    enabled: true
+    state: started
   tags: nftables

@@ -1,13 +1,11 @@
 #!/usr/sbin/nft -f
 
-# to make sure this does not error on the first import we need to
-# create the table before we delete it.
-# The create does nothing if the table alread exists, but delete would
-# error if the table does not exist...
-table nat
-delete table nat
+# Ensure the tables exist before flushing them so the first import succeeds.
+# Flushing removes rules and chains left by an earlier configuration.
+table ip nat
+flush table ip nat
 
-table nat {
+table ip nat {
 	chain postrouting {
 		type nat hook postrouting priority 100;
 
@@ -16,6 +14,9 @@ table nat {
 {% endfor %}
 	}
 }
+
+table ip6 nat
+flush table ip6 nat
 
 table ip6 nat {
 	chain prerouting {

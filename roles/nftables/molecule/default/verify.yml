@@ -35,6 +35,49 @@
     - name: Assert config file permissions
       ansible.builtin.assert:
         that:
-          - "nftables_nft_conf.stat.mode == '0633'"
+          - "nftables_nft_conf.stat.mode == '0644'"
           - "nftables_nft_conf.stat.pw_name == 'root'"
           - "nftables_nft_conf.stat.gr_name == 'root'"
+
+    - name: Check NAT config file permissions
+      ansible.builtin.stat:
+        path: /etc/nftables.d/tables/nat.conf
+      register: nftables_nat_conf
+
+    - name: Assert NAT config file permissions
+      ansible.builtin.assert:
+        that:
+          - nftables_nat_conf.stat.exists
+          - "nftables_nat_conf.stat.mode == '0644'"
+          - "nftables_nat_conf.stat.pw_name == 'root'"
+          - "nftables_nat_conf.stat.gr_name == 'root'"
+
+    - name: Reconfigure without NAT rules
+      ansible.builtin.include_role:
+        name: "../../../nftables"
+      vars:
+        nftables_nat_rules: {}
+        nftables_nat_ip6_rules: {}
+
+    - name: Apply configuration without NAT rules
+      ansible.builtin.meta: flush_handlers
+
+    - name: Check empty NAT config file
+      ansible.builtin.stat:
+        path: /etc/nftables.d/tables/nat.conf
+      register: nftables_empty_nat_conf
+
+    - name: Get ruleset without NAT rules
+      ansible.builtin.command: nft list ruleset
+      register: nftables_empty_nat_ruleset
+      changed_when: false
+
+    - name: Assert NAT rules were removed
+      ansible.builtin.assert:
+        that:
+          - nftables_empty_nat_conf.stat.exists
+          - "'table ip nat' in nftables_empty_nat_ruleset.stdout"
+          - "'table ip6 nat' in nftables_empty_nat_ruleset.stdout"
+          - "'oifname \"eth0\" masquerade' not in nftables_empty_nat_ruleset.stdout"
+          - "'ip saddr 192.168.2.0/24 snat to 192.168.1.100' not in nftables_empty_nat_ruleset.stdout"
+          - "'ip6 daddr 2001:db8::1 dnat to 2001:db8::100' not in nftables_empty_nat_ruleset.stdout"
