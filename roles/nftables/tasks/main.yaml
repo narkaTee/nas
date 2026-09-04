@@ -1,4 +1,20 @@
 ---
+- name: Validate firewall configuration
+  ansible.builtin.assert:
+    that:
+      - nftables_config.input.policy in ['accept', 'drop']
+      - nftables_config.input.presets | difference(nftables_presets.keys()) | length == 0
+    fail_msg: >-
+      Invalid input policy or unknown nftables preset. Available presets:
+      {{ nftables_presets.keys() | list | sort | join(', ') }}
+  tags: nftables
+
+- name: Install nftables
+  ansible.builtin.package:
+    name: nftables
+    state: present
+  tags: nftables
+
 - name: Create directories
   ansible.builtin.file:
     dest: "{{ item }}"

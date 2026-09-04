@@ -1,0 +1,29 @@
+---
+- name: Converge input firewall configuration
+  hosts: all
+  any_errors_fatal: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts["pkg_mgr"] == "apt"
+
+    - name: Install nftables
+      ansible.builtin.package:
+        name: nftables
+        state: present
+
+    - name: Include nftables role with input firewall
+      ansible.builtin.include_role:
+        name: "../../../nftables"
+      vars:
+        nftables_config:
+          input:
+            policy: drop
+            presets:
+              - baseline
+              - dhcp_client
+              - ssh
+            rules:
+              - tcp dport 8123 accept

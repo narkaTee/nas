@@ -27,6 +27,11 @@
           - "'ip saddr 192.168.2.0/24 snat to 192.168.1.100' in nftables_nft_ruleset.stdout"
           - "'ip6 daddr 2001:db8::1 dnat to 2001:db8::100' in nftables_nft_ruleset.stdout"
 
+    - name: Assert input firewall is open by default
+      ansible.builtin.assert:
+        that:
+          - "'policy accept' in nftables_nft_ruleset.stdout"
+
     - name: Check config file permissions
       ansible.builtin.stat:
         path: /etc/nftables.conf

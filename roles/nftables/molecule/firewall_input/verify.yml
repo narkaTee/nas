@@ -1,0 +1,22 @@
+---
+- name: Verify input firewall configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get nftables ruleset
+      ansible.builtin.command: nft list ruleset
+      register: nftables_firewall_ruleset
+      changed_when: false
+
+    - name: Assert input policy, presets, and custom rules
+      ansible.builtin.assert:
+        that:
+          - "'policy drop' in nftables_firewall_ruleset.stdout"
+          - "'ct state invalid drop' in nftables_firewall_ruleset.stdout"
+          - "'ct state established,related accept' in nftables_firewall_ruleset.stdout"
+          - "'iifname \"lo\" accept' in nftables_firewall_ruleset.stdout"
+          - "'meta l4proto { icmp, ipv6-icmp } accept' in nftables_firewall_ruleset.stdout"
+          - "'udp sport 67 udp dport 68 accept' in nftables_firewall_ruleset.stdout"
+          - "'udp sport 547 udp dport 546 accept' in nftables_firewall_ruleset.stdout"
+          - "'tcp dport 22 accept' in nftables_firewall_ruleset.stdout"
+          - "'tcp dport 8123 accept' in nftables_firewall_ruleset.stdout"

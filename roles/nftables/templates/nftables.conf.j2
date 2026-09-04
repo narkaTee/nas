@@ -8,6 +8,20 @@ flush table inet filter
 table inet filter {
 	chain input {
 		type filter hook input priority filter;
+		policy {{ nftables_config.input.policy }};
+
+{% for preset_name in nftables_config.input.presets %}
+		# preset: {{ preset_name }}
+{% for rule in nftables_presets[preset_name] %}
+		{{ rule }}
+{% endfor %}
+{% endfor %}
+{% if nftables_config.input.rules %}
+		# host rules
+{% for rule in nftables_config.input.rules %}
+		{{ rule }}
+{% endfor %}
+{% endif %}
 	}
 	chain forward {
 		type filter hook forward priority filter;

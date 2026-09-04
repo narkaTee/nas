@@ -1,0 +1,18 @@
+---
+nftables_config:
+  input:
+    policy: accept
+    presets: []
+    rules: []
+
+nftables_presets:
+  baseline:
+    - ct state invalid drop
+    - ct state established,related accept
+    - iifname "lo" accept
+    - meta l4proto { icmp, ipv6-icmp } accept
+  dhcp_client:
+    - udp sport 67 udp dport 68 accept
+    - udp sport 547 udp dport 546 accept
+  ssh:
+    - tcp dport 22 accept
