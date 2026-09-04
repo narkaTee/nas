@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]; then
+    echo "Missing playbook name" >&2
+    exit 1
+fi
+
+play="playbook-${1}.yaml"
+shift
+
+if [ ! -f "$play" ]; then
+    echo "$play not found!" >&2
+    exit 1
+fi
+
+uv run ansible-playbook "${play}" -K "$@"
