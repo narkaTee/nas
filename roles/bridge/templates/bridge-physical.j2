@@ -1,0 +1,20 @@
+auto {{ bridge.ifname }}
+iface {{ bridge.ifname }} inet {{ bridge.ipv4.method }}
+    bridge_hw {{ bridge.macaddress }}
+    bridge_ports {{ bridge.ports | join(' ') }}
+{% if bridge.ipv4.method == 'static' %}
+    address {{ bridge.ipv4.address }}
+{% if bridge.ipv4.gateway is defined %}
+    gateway {{ bridge.ipv4.gateway }}
+{% endif %}
+{% endif %}
+
+{% if bridge.ipv6 is defined %}
+iface {{ bridge.ifname }} inet6 {{ bridge.ipv6.method }}
+{% if bridge.ipv6.method == 'static' %}
+    address {{ bridge.ipv6.address }}
+{% if bridge.ipv6.gateway is defined %}
+    gateway {{ bridge.ipv6.gateway }}
+{% endif %}
+{% endif %}
+{% endif %}

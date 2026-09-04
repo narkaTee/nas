@@ -1,0 +1,67 @@
+---
+- name: Verify physical bridge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get bridge link
+      ansible.builtin.command: ip -details link show br-test
+      register: bridge_physical_link
+      changed_when: false
+
+    - name: Get bridge addresses
+      ansible.builtin.command: ip address show dev br-test
+      register: bridge_physical_addresses
+      changed_when: false
+
+    - name: Get bridge port
+      ansible.builtin.command: ip -details link show test-uplink
+      register: bridge_physical_port
+      changed_when: false
+
+    - name: Read IPv4 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv4.ip_forward
+      register: bridge_physical_ipv4_forwarding
+      changed_when: false
+
+    - name: Read IPv6 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv6.conf.all.forwarding
+      register: bridge_physical_ipv6_forwarding
+      changed_when: false
+
+    - name: Check dnsmasq bridge configuration
+      ansible.builtin.stat:
+        path: /etc/dnsmasq.d/bridge-br-test.config
+      register: bridge_physical_dnsmasq
+
+    - name: Check forwarding configuration
+      ansible.builtin.stat:
+        path: /etc/sysctl.d/50-ip-forwarding.conf
+      register: bridge_physical_forwarding_config
+
+    - name: Read network interfaces configuration
+      ansible.builtin.slurp:
+        src: /etc/network/interfaces
+      register: bridge_physical_interfaces
+
+    - name: Assert physical bridge state
+      ansible.builtin.assert:
+        that:
+          - "'UP' in bridge_physical_link.stdout_lines[0]"
+          - "'bridge' in bridge_physical_link.stdout"
+          - "'02:00:00:00:00:42' in bridge_physical_link.stdout"
+          - "'inet 192.0.2.2/24' in bridge_physical_addresses.stdout"
+          - "'inet6 fd00:ffff::2/64' in bridge_physical_addresses.stdout"
+          - "'master br-test' in bridge_physical_port.stdout"
+          - "'inet ' not in bridge_physical_port.stdout"
+          - "'198.51.100.2' not in bridge_physical_port.stdout"
+          - "'fd00:eeee::2' not in bridge_physical_port.stdout"
+          - >-
+            'iface test-uplink' not in
+            (bridge_physical_interfaces.content | b64decode)
+          - >-
+            'allow-hotplug test-uplink' not in
+            (bridge_physical_interfaces.content | b64decode)
+          - bridge_physical_ipv4_forwarding.stdout == '0'
+          - bridge_physical_ipv6_forwarding.stdout == '0'
+          - not bridge_physical_dnsmasq.stat.exists
+          - not bridge_physical_forwarding_config.stat.exists

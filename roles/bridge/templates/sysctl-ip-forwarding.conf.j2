@@ -1,6 +1,2 @@
-{% if bridge_bridges | selectattr('forwarding') | selectattr('ipv4', 'defined') | list %}
-net.ipv4.ip_forward = 1
-{% endif %}
-{% if bridge_bridges | selectattr('forwarding') | selectattr('ipv6', 'defined') | list %}
-net.ipv6.conf.all.forwarding = 1
-{% endif %}
+net.ipv4.ip_forward = {{ 1 if bridge_bridges | selectattr('type', 'equalto', 'isolated') | selectattr('forwarding') | selectattr('ipv4', 'defined') | list else 0 }}
+net.ipv6.conf.all.forwarding = {{ 1 if bridge_bridges | selectattr('type', 'equalto', 'isolated') | selectattr('forwarding') | selectattr('ipv6', 'defined') | list else 0 }}

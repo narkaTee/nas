@@ -1,0 +1,25 @@
+---
+- name: Converge physical bridge
+  hosts: all
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts["pkg_mgr"] == "apt"
+  roles:
+    - role: "../../../bridge"
+      vars:
+        bridge_bridges:
+          - ifname: br-test
+            type: physical
+            ports:
+              - test-uplink
+            macaddress: "02:00:00:00:00:42"
+            ipv4:
+              method: static
+              address: 192.0.2.2/24
+            ipv6:
+              method: static
+              address: fd00:ffff::2/64

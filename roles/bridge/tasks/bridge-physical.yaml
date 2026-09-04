@@ -1,0 +1,78 @@
+---
+- name: Configure physical bridge
+  ansible.builtin.template:
+    dest: /etc/network/interfaces.d/bridge-{{ bridge.ifname }}
+    src: bridge-physical.j2
+    owner: root
+    group: root
+    mode: "0644"
+  register: bridge_config
+  tags: bridge
+
+- name: Check standalone physical interface configuration
+  ansible.builtin.command: ifquery {{ port }}
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: bridge_port_configuration
+  loop: "{{ bridge.ports }}"
+  loop_control:
+    loop_var: port
+    label: "{{ port }}"
+  tags: bridge
+
+- name: Check physical bridge state
+  ansible.builtin.command: ifquery --state {{ bridge.ifname }}
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: bridge_interface_state
+  tags: bridge
+
+- name: Determine whether physical bridge migration is required
+  ansible.builtin.set_fact:
+    bridge_migration_required: >-
+      {{ bridge_config.changed or bridge_interface_state.rc != 0 or
+         (bridge_port_configuration.results |
+          selectattr('rc', 'equalto', 0) | list | length > 0) }}
+  tags: bridge
+
+- name: Migrate physical interfaces to bridge
+  when: bridge_migration_required
+  tags: bridge
+  block:
+    - name: Shut down physical interfaces
+      ansible.builtin.command: ifdown --force {{ port.port }}
+      when: port.rc == 0
+      loop: "{{ bridge_port_configuration.results }}"
+      loop_control:
+        loop_var: port
+        label: "{{ port.port }}"
+
+    - name: Shut down physical bridge
+      ansible.builtin.command: ifdown --force {{ bridge.ifname }}
+
+    - name: Remove standalone interface configuration
+      ansible.builtin.replace:
+        path: "{{ bridge.port_config_file | default('/etc/network/interfaces') }}"
+        regexp: '(?m)^iface[ \t]+{{ port | regex_escape }}[ \t]+inet6?[ \t]+[^\n]+(?:\n[ \t]+[^\n]*)*\n?'
+        replace: ""
+        backup: true
+      loop: "{{ bridge.ports }}"
+      loop_control:
+        loop_var: port
+        label: "{{ port }}"
+
+    - name: Remove standalone interface activation
+      ansible.builtin.lineinfile:
+        path: "{{ bridge.port_config_file | default('/etc/network/interfaces') }}"
+        regexp: "^(auto|allow-hotplug)\\s+{{ port | regex_escape }}\\s*$"
+        state: absent
+        backup: true
+      loop: "{{ bridge.ports }}"
+      loop_control:
+        loop_var: port
+        label: "{{ port }}"
+
+    - name: Start physical bridge
+      ansible.builtin.command: ifup {{ bridge.ifname }}

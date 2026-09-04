@@ -1,0 +1,35 @@
+---
+- name: Prepare synthetic physical interface
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check test uplink
+      ansible.builtin.command: ip link show test-uplink
+      register: bridge_test_uplink
+      changed_when: false
+      failed_when: false
+
+    - name: Create test veth pair
+      ansible.builtin.command: >-
+        ip link add test-uplink type veth peer name test-peer
+      when: bridge_test_uplink.rc != 0
+      changed_when: true
+
+    - name: Activate test peer
+      ansible.builtin.command: ip link set test-peer up
+      changed_when: true
+
+    - name: Configure standalone test uplink
+      ansible.builtin.blockinfile:
+        path: /etc/network/interfaces
+        marker: "# {mark} MOLECULE TEST UPLINK"
+        block: |
+          allow-hotplug test-uplink
+          iface test-uplink inet static
+              address 198.51.100.2/24
+          iface test-uplink inet6 static
+              address fd00:eeee::2/64
+
+    - name: Start standalone test uplink
+      ansible.builtin.command: ifup test-uplink
+      changed_when: true

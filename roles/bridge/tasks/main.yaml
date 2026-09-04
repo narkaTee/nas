@@ -9,13 +9,22 @@
 - name: Validate bridge configuration
   ansible.builtin.assert:
     that:
-      - bridge.type == 'isolated'
-      - bridge.ipv4.method == 'static'
-      - bridge.ipv4.address is defined
-      - bridge.ipv6 is not defined or bridge.ipv6.method == 'static'
-      - bridge.ipv6 is not defined or bridge.ipv6.address is defined
+      - bridge.type in ['isolated', 'physical']
+      - bridge.type != 'isolated' or bridge.forwarding is defined
+      - bridge.type != 'isolated' or bridge.forwarding is boolean
+      - bridge.ipv4.method in ['static', 'dhcp']
+      - bridge.ipv4.method != 'static' or bridge.ipv4.address is defined
+      - bridge.ipv6 is not defined or bridge.ipv6.method in ['static', 'auto', 'dhcp']
+      - bridge.ipv6 is not defined or bridge.ipv6.method != 'static' or bridge.ipv6.address is defined
+      - bridge.type != 'isolated' or bridge.ipv4.method == 'static'
+      - bridge.type != 'isolated' or bridge.ports | default([]) | length == 0
+      - bridge.type != 'physical' or bridge.ports | default([]) | length > 0
+      - bridge.type != 'physical' or bridge.macaddress is defined
+      - bridge.type != 'physical' or bridge.dhcp_server is not defined
     fail_msg: >-
-      Only isolated bridges with static addresses are supported currently.
+      Invalid bridge configuration. Isolated bridges require a forwarding
+      boolean, a static IPv4 address, and no ports. Physical bridges require at
+      least one port and a fixed MAC address, and cannot provide DHCP service.
   loop: "{{ bridge_bridges }}"
   loop_control:
     loop_var: bridge
@@ -28,18 +37,8 @@
     line: source /etc/network/interfaces.d/*
   tags: bridge
 
-- name: Enable routing
-  ansible.builtin.template:
-    src: templates/sysctl-ip-forwarding.conf.j2
-    dest: /etc/sysctl.d/50-ip-forwarding.conf
-    owner: root
-    group: root
-    mode: "0644"
-  notify: Reload sysctl
-  tags: bridge
-
 - name: Create bridges
-  ansible.builtin.include_tasks: "bridge.yaml"
+  ansible.builtin.include_tasks: "bridge-{{ bridge.type }}.yaml"
   loop: "{{ bridge_bridges }}"
   loop_control:
     loop_var: bridge

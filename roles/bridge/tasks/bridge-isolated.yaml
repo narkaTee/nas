@@ -1,22 +1,33 @@
-- name: Setup bridge config
+---
+- name: Configure isolated bridge
   ansible.builtin.template:
     dest: /etc/network/interfaces.d/bridge-{{ bridge.ifname }}
-    src: bridge-interface.j2
+    src: bridge-isolated.j2
     owner: root
     group: root
     mode: "0644"
   register: bridge_config
   tags: bridge
 
-- name: Shutdown interface
-  ansible.builtin.command: ifdown {{ bridge.ifname }}
-  when: bridge_config.changed
+- name: Enable routing
+  ansible.builtin.template:
+    src: templates/sysctl-ip-forwarding.conf.j2
+    dest: /etc/sysctl.d/50-ip-forwarding.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload sysctl
   tags: bridge
 
-- name: Start interface
-  ansible.builtin.command: ifup {{ bridge.ifname }}
+- name: Restart isolated bridge
   when: bridge_config.changed
   tags: bridge
+  block:
+    - name: Shut down isolated bridge
+      ansible.builtin.command: ifdown {{ bridge.ifname }}
+
+    - name: Start isolated bridge
+      ansible.builtin.command: ifup {{ bridge.ifname }}
 
 - name: Disable DAD
   ansible.posix.sysctl:
@@ -30,7 +41,7 @@
     - not (bridge.ipv6.dad | default(true))
   tags: bridge
 
-- name: Setup DHCP
+- name: Configure DHCP server
   ansible.builtin.import_tasks: dhcp.yaml
   when: bridge.dhcp_server is defined
   tags: bridge

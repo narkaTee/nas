@@ -1,9 +1,0 @@
-auto {{ bridge.ifname }}
-iface {{ bridge.ifname }} inet {{ bridge.ipv4.method }}
-    bridge_ports none
-    address {{ bridge.ipv4.address }}
-
-{% if bridge.ipv6 is defined %}
-iface {{ bridge.ifname }} inet6 {{ bridge.ipv6.method }}
-	address {{ bridge.ipv6.address }}
-{% endif %}
