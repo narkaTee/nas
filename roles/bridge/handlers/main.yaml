@@ -6,5 +6,5 @@
   tags: bridge
 
 - name: Reload sysctl
-  ansible.builtin.command: sysctl --system
+  ansible.builtin.command: sysctl --load /etc/sysctl.d/50-ip-forwarding.conf
   tags: bridge

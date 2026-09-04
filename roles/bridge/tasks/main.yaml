@@ -1,8 +1,25 @@
 ---
-# we need the if-pre-up.d bridge plugin this package supplies
-- name: Install depenencies
+# The ifupdown bridge plugin is supplied by bridge-utils.
+- name: Install dependencies
   ansible.builtin.package:
     name: bridge-utils
+    state: present
+  tags: bridge
+
+- name: Validate bridge configuration
+  ansible.builtin.assert:
+    that:
+      - bridge.type == 'isolated'
+      - bridge.ipv4.method == 'static'
+      - bridge.ipv4.address is defined
+      - bridge.ipv6 is not defined or bridge.ipv6.method == 'static'
+      - bridge.ipv6 is not defined or bridge.ipv6.address is defined
+    fail_msg: >-
+      Only isolated bridges with static addresses are supported currently.
+  loop: "{{ bridge_bridges }}"
+  loop_control:
+    loop_var: bridge
+    label: "{{ bridge.ifname }}"
   tags: bridge
 
 - name: Setup interface.d include

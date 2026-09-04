@@ -1,0 +1,49 @@
+---
+- name: Verify isolated bridge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get bridge link
+      ansible.builtin.command: ip -details link show priv-test
+      register: bridge_link
+      changed_when: false
+
+    - name: Get bridge addresses
+      ansible.builtin.command: ip address show dev priv-test
+      register: bridge_addresses
+      changed_when: false
+
+    - name: Read IPv4 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv4.ip_forward
+      register: bridge_ipv4_forwarding
+      changed_when: false
+
+    - name: Read IPv6 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv6.conf.all.forwarding
+      register: bridge_ipv6_forwarding
+      changed_when: false
+
+    - name: Read DAD state
+      ansible.builtin.command: sysctl -n net.ipv6.conf.priv-test.accept_dad
+      register: bridge_dad
+      changed_when: false
+
+    - name: Read dnsmasq bridge configuration
+      ansible.builtin.slurp:
+        src: /etc/dnsmasq.d/bridge-priv-test.config
+      register: bridge_dnsmasq_config
+
+    - name: Assert isolated bridge state
+      ansible.builtin.assert:
+        that:
+          - "'UP' in bridge_link.stdout_lines[0]"
+          - "'bridge' in bridge_link.stdout"
+          - "'inet 192.0.2.1/24' in bridge_addresses.stdout"
+          - "'inet6 fd00:ffff::1/64' in bridge_addresses.stdout"
+          - bridge_ipv4_forwarding.stdout == '1'
+          - bridge_ipv6_forwarding.stdout == '1'
+          - bridge_dad.stdout == '0'
+          - "'interface=priv-test' in (bridge_dnsmasq_config.content | b64decode)"
+          - >-
+            'dhcp-range=192.0.2.100,192.0.2.200' in
+            (bridge_dnsmasq_config.content | b64decode)

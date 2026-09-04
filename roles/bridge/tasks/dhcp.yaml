@@ -12,7 +12,7 @@
     dest: /etc/dnsmasq.d/bridge-{{ bridge.ifname }}.config
     owner: root
     group: root
-    mode: "0622"
+    mode: "0644"
   notify:
     - Restart dnsmasq
   tags: bridge

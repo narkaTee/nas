@@ -31,13 +31,18 @@ zfs_volumes:
 
 bridge_bridges:
   - ifname: priv-net
-    dhcp:
+    type: isolated
+    forwarding: true
+    dhcp_server:
       range_start: 192.168.1.100
       range_end: 192.168.1.254
     ipv4:
+      method: static
       address: 192.168.1.1/24
     ipv6:
+      method: static
       address: fd00::1/64
+      dad: false
 
 exim4_mail_relay_additional_interfaces:
   - 192.168.1.1
