@@ -1,0 +1,8 @@
+---
+- name: Setup ha-host
+  hosts: ha-host
+  become: true
+  roles:
+    - role: auto-upgrade
+    - role: nftables
+    - role: bridge

@@ -1,0 +1,20 @@
+---
+nftables_config:
+  input:
+    policy: drop
+    presets:
+      - baseline
+      - dhcp_client
+      - ssh
+    rules: []
+
+bridge_bridges:
+  - ifname: br0
+    type: physical
+    ports:
+      - enp1s0
+    macaddress: "20:88:10:8a:a3:15"
+    ipv4:
+      method: dhcp
+    ipv6:
+      method: auto

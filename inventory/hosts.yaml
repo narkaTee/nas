@@ -3,6 +3,8 @@ all:
   hosts:
     nas:
       ansible_connection: local
+    ha-host:
+      ansible_connection: local
     pi01:
       ansible_connection: ssh
     pihole:
