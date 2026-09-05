@@ -1,0 +1,43 @@
+name: Molecule Discovery
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  discover-molecule-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      roles: "${{ steps.discover.outputs.roles }}"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Discover roles with Molecule tests
+        id: discover
+        run: |
+          roles=$(find roles -maxdepth 1 -type d -exec test -d "{}/molecule" \; -print | jq -R . | jq -Mcs .)
+          echo "Found roles with Molecule tests: $roles"
+          echo "roles=$roles" >> "$GITHUB_OUTPUT"
+
+  molecule-tests:
+    needs: discover-molecule-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        role: "${{ fromJson(needs.discover-molecule-tests.outputs.roles) }}"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Molecule tests
+        uses: ./.github/actions/molecule-test
+        with:
+          path: ${{ matrix.role }}

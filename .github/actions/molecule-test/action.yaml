@@ -1,0 +1,33 @@
+name: Molecule tests
+
+inputs:
+  path:
+    description: Working directory in which to run Molecule
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Podman
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install podman
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      shell: bash
+      run: uv sync --locked
+
+    - name: Install Ansible collections
+      shell: bash
+      run: uv run ansible-galaxy install -r requirements.yaml
+
+    - name: Run Molecule tests
+      shell: bash
+      run: uv run molecule test --all
+      working-directory: ${{ inputs.path }}

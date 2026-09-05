@@ -8,9 +8,11 @@ jobs:
   tests:
     name: Run tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up python
         uses: actions/setup-python@v4
@@ -19,3 +21,7 @@ jobs:
 
       - name: Test duplicity_prometheus.py
         run: ./roles/offsite-backup/templates/test_duplicity_prometheus.py
+
+  molecule:
+    name: Molecule tests
+    uses: ./.github/workflows/molecule-discovery.yaml
