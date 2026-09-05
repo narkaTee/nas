@@ -1,4 +1,0 @@
-yamllint
-ansible-core
-ansible-lint
-jmespath
