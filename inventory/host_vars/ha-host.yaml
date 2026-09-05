@@ -47,4 +47,7 @@ libvirt_vm_definitions:
         source: br0
         model: virtio
         mac: "52:54:00:00:00:12"
-    usb_devices: []
+    usb_devices:
+      - vendor_id: 303a
+        product_id: 831a
+        startup_policy: optional
