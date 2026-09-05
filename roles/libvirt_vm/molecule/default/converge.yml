@@ -1,0 +1,70 @@
+---
+- name: Converge libvirt virtual machine
+  hosts: all
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts["pkg_mgr"] == "apt"
+
+    - name: Install fixture compression utility
+      ansible.builtin.apt:
+        name: xz-utils
+        state: present
+        install_recommends: false
+  roles:
+    - role: "../../../libvirt_host"
+      vars:
+        libvirt_host_require_kvm: false
+  tasks:
+    - name: Create fixture image
+      ansible.builtin.command:
+        cmd: qemu-img create -f qcow2 /var/cache/molecule-source.qcow2 16M
+        creates: /var/cache/molecule-source.qcow2
+
+    - name: Compress fixture image
+      ansible.builtin.command:
+        cmd: xz --keep /var/cache/molecule-source.qcow2
+        creates: /var/cache/molecule-source.qcow2.xz
+
+    - name: Calculate fixture checksum
+      ansible.builtin.stat:
+        path: /var/cache/molecule-source.qcow2.xz
+        checksum_algorithm: sha256
+      register: libvirt_vm_fixture
+
+    - name: Manage test virtual machine
+      ansible.builtin.include_role:
+        name: "../../../libvirt_vm"
+      vars:
+        libvirt_vm_definitions:
+          - name: molecule-vm
+            domain_type: qemu
+            state: stopped
+            autostart: true
+            memory_mb: 1024
+            vcpus: 1
+            firmware:
+              type: efi
+              secure_boot: false
+            disks:
+              - path: /var/lib/libvirt/images/molecule-vm.qcow2
+                format: qcow2
+                target: sda
+                bus: scsi
+                size: 64M
+                bootstrap:
+                  url: file:///var/cache/molecule-source.qcow2.xz
+                  compression: xz
+                  checksum: "sha256:{{ libvirt_vm_fixture.stat.checksum }}"
+            interfaces:
+              - type: bridge
+                source: br-test
+                model: virtio
+                mac: "52:54:00:00:00:42"
+            usb_devices:
+              - vendor_id: "1234"
+                product_id: "5678"
+                startup_policy: optional

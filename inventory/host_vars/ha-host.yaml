@@ -18,3 +18,33 @@ bridge_bridges:
       method: dhcp
     ipv6:
       method: auto
+
+haos_version: "18.2"
+
+libvirt_vm_definitions:
+  - name: home-assistant
+    state: running
+    autostart: true
+    memory_mb: 8192
+    vcpus: 4
+    firmware:
+      type: efi
+      secure_boot: false
+    disks:
+      - path: /var/lib/libvirt/images/home-assistant.qcow2
+        format: qcow2
+        target: sda
+        bus: scsi
+        size: 64G
+        bootstrap:
+          url: >-
+            {{ 'https://github.com/home-assistant/operating-system/releases/download/' ~
+               haos_version ~ '/haos_ova-' ~ haos_version ~ '.qcow2.xz' }}
+          compression: xz
+          checksum: "sha256:254e53f354df0739e3afc09be5431a07df53f0df6b703885404f665c454f254e"
+    interfaces:
+      - type: bridge
+        source: br0
+        model: virtio
+        mac: "52:54:00:00:00:12"
+    usb_devices: []

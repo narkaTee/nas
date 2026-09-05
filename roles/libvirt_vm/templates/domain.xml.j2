@@ -1,0 +1,43 @@
+<domain type="{{ vm.domain_type | default('kvm') }}">
+  <name>{{ vm.name }}</name>
+  <memory unit="MiB">{{ vm.memory_mb }}</memory>
+  <vcpu placement="static">{{ vm.vcpus }}</vcpu>
+  <os firmware="efi">
+    <firmware>
+      <feature enabled="{{ 'yes' if vm.firmware.secure_boot | default(false) else 'no' }}" name="secure-boot"/>
+    </firmware>
+    <type arch="x86_64" machine="q35">hvm</type>
+    <boot dev="hd"/>
+  </os>
+  <features>
+    <acpi/>
+  </features>
+  <devices>
+{% for disk in vm.disks %}
+    <disk type="file" device="disk">
+      <driver name="qemu" type="{{ disk.format }}"/>
+      <source file="{{ disk.path }}"/>
+      <target dev="{{ disk.target }}" bus="{{ disk.bus }}"/>
+    </disk>
+{% endfor %}
+    <controller type="scsi" model="virtio-scsi"/>
+{% for interface in vm.interfaces | default([]) %}
+    <interface type="bridge">
+      <mac address="{{ interface.mac }}"/>
+      <source bridge="{{ interface.source }}"/>
+      <model type="{{ interface.model | default('virtio') }}"/>
+    </interface>
+{% endfor %}
+    <channel type="unix">
+      <target type="virtio" name="org.qemu.guest_agent.0"/>
+    </channel>
+{% for usb in vm.usb_devices | default([]) %}
+    <hostdev mode="subsystem" type="usb">
+      <source startupPolicy="{{ usb.startup_policy }}">
+        <vendor id="0x{{ usb.vendor_id }}"/>
+        <product id="0x{{ usb.product_id }}"/>
+      </source>
+    </hostdev>
+{% endfor %}
+  </devices>
+</domain>

@@ -4,5 +4,6 @@ collections:
   - name: containers.podman
   - name: community.general
     version: ">=8.5.0"
+  - name: community.libvirt
   - name: grafana.grafana
   - name: prometheus.prometheus

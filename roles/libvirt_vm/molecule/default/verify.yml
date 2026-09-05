@@ -1,0 +1,37 @@
+---
+- name: Verify libvirt virtual machine
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read virtual machine information
+      ansible.builtin.command: virsh --connect qemu:///system dominfo molecule-vm
+      register: libvirt_vm_domain_info
+      changed_when: false
+
+    - name: Read virtual machine XML
+      ansible.builtin.command: virsh --connect qemu:///system dumpxml molecule-vm
+      register: libvirt_vm_domain_xml
+      changed_when: false
+
+    - name: Read disk information
+      ansible.builtin.command: >-
+        qemu-img info --output=json
+        /var/lib/libvirt/images/molecule-vm.qcow2
+      register: libvirt_vm_disk_info
+      changed_when: false
+
+    - name: Assert virtual machine state
+      ansible.builtin.assert:
+        that:
+          - "'State:          shut off' in libvirt_vm_domain_info.stdout"
+          - "'Autostart:      enable' in libvirt_vm_domain_info.stdout"
+          - "'<loader' in libvirt_vm_domain_xml.stdout"
+          - "\"secure='yes'\" not in libvirt_vm_domain_xml.stdout"
+          - "\"model='virtio-scsi'\" in libvirt_vm_domain_xml.stdout"
+          - "\"bridge='br-test'\" in libvirt_vm_domain_xml.stdout"
+          - "'52:54:00:00:00:42' in libvirt_vm_domain_xml.stdout"
+          - "'org.qemu.guest_agent.0' in libvirt_vm_domain_xml.stdout"
+          - "\"vendor id='0x1234'\" in libvirt_vm_domain_xml.stdout"
+          - "\"product id='0x5678'\" in libvirt_vm_domain_xml.stdout"
+          - (libvirt_vm_disk_info.stdout | from_json).format == 'qcow2'
+          - (libvirt_vm_disk_info.stdout | from_json)['virtual-size'] == 67108864

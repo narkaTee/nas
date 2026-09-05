@@ -1,0 +1,99 @@
+---
+- name: Validate virtual machine configuration
+  ansible.builtin.assert:
+    that:
+      - vm.name is defined
+      - vm.state in ['running', 'stopped']
+      - vm.autostart is boolean
+      - vm.memory_mb | int > 0
+      - vm.vcpus | int > 0
+      - vm.disks | length > 0
+      - vm.interfaces | default([]) | selectattr('mac', 'undefined') | list | length == 0
+      - >-
+        vm.usb_devices | default([]) |
+        rejectattr('startup_policy', 'in', ['mandatory', 'requisite', 'optional']) |
+        list | length == 0
+    fail_msg: "Invalid configuration for virtual machine {{ vm.name }}."
+
+- name: Validate virtual machine disks
+  ansible.builtin.assert:
+    that:
+      - disk.path is defined
+      - disk.format == 'qcow2'
+      - disk.target is defined
+      - disk.bus == 'scsi'
+      - disk.bootstrap is not defined or disk.bootstrap.url is defined
+      - disk.bootstrap is not defined or disk.bootstrap.checksum is defined
+      - disk.bootstrap is not defined or disk.bootstrap.compression == 'xz'
+    fail_msg: "Invalid disk configuration for {{ vm.name }}."
+  loop: "{{ vm.disks }}"
+  loop_control:
+    loop_var: disk
+    label: "{{ disk.path | default('unknown') }}"
+
+- name: Create virtual machine storage directories
+  ansible.builtin.file:
+    path: "{{ disk.path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ vm.disks }}"
+  loop_control:
+    loop_var: disk
+    label: "{{ disk.path }}"
+
+- name: Check virtual machine disks
+  ansible.builtin.stat:
+    path: "{{ disk.path }}"
+  register: libvirt_vm_disk_state
+  loop: "{{ vm.disks }}"
+  loop_control:
+    loop_var: disk
+    label: "{{ disk.path }}"
+
+- name: Bootstrap missing virtual machine disks
+  ansible.builtin.include_tasks: bootstrap.yaml
+  when:
+    - not disk_state.stat.exists
+    - disk_state.disk.bootstrap is defined
+  loop: "{{ libvirt_vm_disk_state.results }}"
+  loop_control:
+    loop_var: disk_state
+    label: "{{ disk_state.disk.path }}"
+
+- name: Check that all virtual machine disks exist
+  ansible.builtin.stat:
+    path: "{{ disk.path }}"
+  register: libvirt_vm_final_disk_state
+  loop: "{{ vm.disks }}"
+  loop_control:
+    loop_var: disk
+    label: "{{ disk.path }}"
+
+- name: Require all virtual machine disks
+  ansible.builtin.assert:
+    that:
+      - disk_state.stat.exists
+      - disk_state.stat.isreg
+    fail_msg: >-
+      Disk {{ disk_state.disk.path }} does not exist and has no bootstrap
+      configuration.
+  loop: "{{ libvirt_vm_final_disk_state.results }}"
+  loop_control:
+    loop_var: disk_state
+    label: "{{ disk_state.disk.path }}"
+
+- name: Define virtual machine
+  community.libvirt.virt:
+    command: define
+    xml: "{{ lookup('template', 'domain.xml.j2') }}"
+    autostart: "{{ vm.autostart }}"
+    uri: qemu:///system
+
+- name: Start virtual machine
+  community.libvirt.virt:
+    name: "{{ vm.name }}"
+    state: running
+    uri: qemu:///system
+  when: vm.state == 'running'

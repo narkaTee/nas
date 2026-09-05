@@ -1,0 +1,39 @@
+---
+- name: Download bootstrap image
+  ansible.builtin.get_url:
+    url: "{{ disk_state.disk.bootstrap.url }}"
+    dest: >-
+      {{ libvirt_vm_cache_dir }}/{{ vm.name }}-{{ disk_state.disk.target }}.qcow2.xz
+    checksum: "{{ disk_state.disk.bootstrap.checksum }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: libvirt_vm_bootstrap_download
+
+- name: Decompress bootstrap image
+  community.general.decompress:
+    src: "{{ libvirt_vm_bootstrap_download.dest }}"
+    dest: "{{ disk_state.disk.path }}.incomplete"
+    format: "{{ disk_state.disk.bootstrap.compression }}"
+    owner: libvirt-qemu
+    group: libvirt-qemu
+    mode: "0600"
+
+- name: Validate bootstrap image
+  ansible.builtin.command:
+    cmd: >-
+      qemu-img check -f {{ disk_state.disk.format }}
+      {{ disk_state.disk.path }}.incomplete
+  changed_when: false
+
+- name: Resize bootstrap image
+  ansible.builtin.command:
+    cmd: >-
+      qemu-img resize -f {{ disk_state.disk.format }}
+      {{ disk_state.disk.path }}.incomplete {{ disk_state.disk.size }}
+  when: disk_state.disk.size is defined
+
+- name: Install bootstrap image atomically
+  ansible.builtin.command:
+    cmd: >-
+      mv -- {{ disk_state.disk.path }}.incomplete {{ disk_state.disk.path }}

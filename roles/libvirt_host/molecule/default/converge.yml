@@ -1,0 +1,15 @@
+---
+- name: Converge libvirt host
+  hosts: all
+  any_errors_fatal: true
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts["pkg_mgr"] == "apt"
+  roles:
+    - role: "../../../libvirt_host"
+      vars:
+        # CI runners and containers do not necessarily expose /dev/kvm.
+        libvirt_host_require_kvm: false

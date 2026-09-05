@@ -1,0 +1,17 @@
+---
+- name: Create image cache
+  ansible.builtin.file:
+    path: "{{ libvirt_vm_cache_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: libvirt
+
+- name: Manage virtual machines
+  ansible.builtin.include_tasks: vm.yaml
+  loop: "{{ libvirt_vm_definitions }}"
+  loop_control:
+    loop_var: vm
+    label: "{{ vm.name }}"
+  tags: libvirt

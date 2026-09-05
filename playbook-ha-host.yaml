@@ -6,3 +6,5 @@
     - role: auto-upgrade
     - role: nftables
     - role: bridge
+    - role: libvirt_host
+    - role: libvirt_vm

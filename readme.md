@@ -26,3 +26,5 @@ Debian machine running a VM for home assiatant.
 
 Why the heck not bare-metal? Because I want to be able to properly monitor the hardware with node exporter
 and do other linux stuff!
+
+see [ha-host](docs/ha-host.md)

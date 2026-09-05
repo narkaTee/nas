@@ -1,0 +1,38 @@
+---
+- name: Verify libvirt host
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Query libvirt
+      ansible.builtin.command: virsh --connect qemu:///system version
+      register: libvirt_host_virsh_version
+      changed_when: false
+
+    - name: Find UEFI firmware descriptors
+      ansible.builtin.find:
+        paths: /usr/share/qemu/firmware
+        patterns: "*.json"
+        file_type: file
+      register: libvirt_host_firmware
+
+    - name: Assert virtualization host state
+      ansible.builtin.assert:
+        that:
+          - "'libvirt-daemon-system' in ansible_facts.packages"
+          - "'ovmf' in ansible_facts.packages"
+          - "'python3-libvirt' in ansible_facts.packages"
+          - "'python3-lxml' in ansible_facts.packages"
+          - "'qemu-system-x86' in ansible_facts.packages"
+          - "'qemu-utils' in ansible_facts.packages"
+          - "'libvirtd.service' in ansible_facts.services"
+          - ansible_facts.services['libvirtd.service'].status == 'enabled'
+          - ansible_facts.services['libvirtd.service'].state == 'running'
+          - libvirt_host_virsh_version.rc == 0
+          - libvirt_host_firmware.matched > 0

@@ -1,0 +1,11 @@
+---
+libvirt_host_require_kvm: true
+
+libvirt_host_packages:
+  - libvirt-clients
+  - libvirt-daemon-system
+  - ovmf
+  - python3-libvirt
+  - python3-lxml
+  - qemu-system-x86
+  - qemu-utils

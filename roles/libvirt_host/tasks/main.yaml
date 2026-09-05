@@ -1,0 +1,31 @@
+---
+- name: Check KVM device
+  ansible.builtin.stat:
+    path: /dev/kvm
+  register: libvirt_host_kvm_device
+  tags: libvirt
+
+- name: Validate KVM availability
+  ansible.builtin.assert:
+    that:
+      - libvirt_host_kvm_device.stat.exists
+      - libvirt_host_kvm_device.stat.ischr
+    fail_msg: >-
+      /dev/kvm is not available. Enable CPU virtualization in the firmware and
+      ensure the KVM kernel modules are loaded.
+  when: libvirt_host_require_kvm
+  tags: libvirt
+
+- name: Install virtualization packages
+  ansible.builtin.apt:
+    name: "{{ libvirt_host_packages }}"
+    state: present
+    install_recommends: false
+  tags: libvirt
+
+- name: Enable libvirt daemon
+  ansible.builtin.service:
+    name: libvirtd
+    enabled: true
+    state: started
+  tags: libvirt
