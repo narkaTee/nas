@@ -121,6 +121,14 @@ cloudflare_dns_records:
     record: nas-kvm
     type: A
     value: "10.143.174.89"
+  - zone: "{{ public_dns_zone_name }}"
+    record: ha-host
+    type: A
+    value: "10.143.174.11"
+  - zone: "{{ public_dns_zone_name }}"
+    record: ha
+    type: A
+    value: "10.143.174.12"
 
 certbot_dns_cloudflare_api_token: "{{ cloudflare_dns_api_token }}"
 certbot_dns_email: "{{ lookup('community.general.onepassword', 'letsencrypt email', vault='nas', field='email') }}"
