@@ -28,6 +28,17 @@
       register: bridge_physical_ipv6_forwarding
       changed_when: false
 
+    - name: Read initial forwarding state
+      ansible.builtin.slurp:
+        src: /tmp/molecule-bridge-forwarding.json
+      register: bridge_physical_initial_forwarding_file
+
+    - name: Parse initial forwarding state
+      ansible.builtin.set_fact:
+        bridge_physical_initial_forwarding: >-
+          {{ bridge_physical_initial_forwarding_file.content |
+             b64decode | from_json }}
+
     - name: Check dnsmasq bridge configuration
       ansible.builtin.stat:
         path: /etc/dnsmasq.d/bridge-br-test.config
@@ -61,7 +72,11 @@
           - >-
             'allow-hotplug test-uplink' not in
             (bridge_physical_interfaces.content | b64decode)
-          - bridge_physical_ipv4_forwarding.stdout == '0'
-          - bridge_physical_ipv6_forwarding.stdout == '0'
+          - >-
+            bridge_physical_ipv4_forwarding.stdout ==
+            bridge_physical_initial_forwarding.ipv4
+          - >-
+            bridge_physical_ipv6_forwarding.stdout ==
+            bridge_physical_initial_forwarding.ipv6
           - not bridge_physical_dnsmasq.stat.exists
           - not bridge_physical_forwarding_config.stat.exists

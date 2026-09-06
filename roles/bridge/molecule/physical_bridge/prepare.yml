@@ -33,3 +33,27 @@
     - name: Start standalone test uplink
       ansible.builtin.command: ifup test-uplink
       changed_when: true
+
+    # Container runtimes choose different forwarding defaults. Preserve the
+    # pre-convergence values so verification checks that the role leaves them unchanged.
+    - name: Read initial IPv4 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv4.ip_forward
+      register: bridge_physical_initial_ipv4_forwarding
+      changed_when: false
+
+    - name: Read initial IPv6 forwarding state
+      ansible.builtin.command: sysctl -n net.ipv6.conf.all.forwarding
+      register: bridge_physical_initial_ipv6_forwarding
+      changed_when: false
+
+    - name: Preserve initial forwarding state
+      ansible.builtin.copy:
+        content: |
+          {{ {
+            'ipv4': bridge_physical_initial_ipv4_forwarding.stdout,
+            'ipv6': bridge_physical_initial_ipv6_forwarding.stdout
+          } | to_nice_json }}
+        dest: /tmp/molecule-bridge-forwarding.json
+        owner: root
+        group: root
+        mode: "0600"
