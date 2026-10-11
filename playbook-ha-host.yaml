@@ -8,3 +8,4 @@
     - role: bridge
     - role: libvirt_host
     - role: libvirt_vm
+    - role: node_exporter

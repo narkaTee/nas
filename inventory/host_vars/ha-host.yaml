@@ -6,7 +6,8 @@ nftables_config:
       - baseline
       - dhcp_client
       - ssh
-    rules: []
+    rules:
+      - tcp dport 9100 accept
 
 bridge_bridges:
   - ifname: br0
