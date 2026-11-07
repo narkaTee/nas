@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux2'",
@@ -468,14 +468,14 @@ wheels = [
 
 [[package]]
 name = "molecule-plugins"
-version = "26.7.15"
+version = "26.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "molecule" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/ca/2967c71978f725772b701b23bd47f9694a9428587a26aa8911ceed2d8549/molecule_plugins-26.7.15.tar.gz", hash = "sha256:df4cab8d9e13ed448fc33d72af1fbae54883e9255a42c021ae7e875dfd3374c1", size = 216679, upload-time = "2026-07-15T16:31:18.145Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/9e/8d3e3e747b68637f76375d9ed1038341f3cc798bab7893f2d87009cc54b4/molecule_plugins-26.11.0.tar.gz", hash = "sha256:194be2c43d950545cc699ab19f1a55b26853809e6e8c855ea1a42edacf5c7ee7", size = 278341, upload-time = "2026-11-02T09:50:26.07Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/03/678571fb5d41e3769c578f131aff4bd5dfd8a402be2767d7374c79dc5cf6/molecule_plugins-26.7.15-py3-none-any.whl", hash = "sha256:191dfa7fd965c637e3b61d0929f2fb741f0df1181a250df62eca3657b1182794", size = 86394, upload-time = "2026-07-15T16:31:16.558Z" },
+    { url = "https://files.pythonhosted.org/packages/21/ca/51af9c76e4b61420f8e7e02d8d5e1991e3853acfdeac1a1a2a9a9d446511/molecule_plugins-26.11.0-py3-none-any.whl", hash = "sha256:513808288b7027c465b124e66a2a31002c7c907b2fea9002f63ee90bb2d0ef84", size = 89609, upload-time = "2026-11-02T09:50:24.34Z" },
 ]
 
 [[package]]
